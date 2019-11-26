@@ -40,6 +40,8 @@ Plugin 'ycm-core/YouCompleteMe'
 Plugin 'w0rp/ale'
 " Plugin 'vim-python/python-syntax'
 Plugin 'kh3phr3n/python-syntax'
+Plugin 'eagletmt/ghcmod-vim'
+Plugin 'Shougo/vimproc'
 
 " aesthetics
 Plugin 'flazz/vim-colorschemes'
@@ -275,15 +277,15 @@ nnoremap L J
 " NERDTree
 map <C-n> :NERDTreeToggle<CR>
 " open on startup
-autocmd vimenter * NERDTree
-au VimEnter * wincmd l
+"autocmd vimenter * NERDTree
+"au VimEnter * wincmd l
 " close if only NERDTree left
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " ignore .pyc
 let NERDTreeIgnore = ['\.pyc$']
 
 " tagbar
-nmap <space>m :TagbarToggle<CR>
-
-" debug
-ab ipdb import ipdb; ipdb.set_trace()
+nmap <C-t> :TagbarToggle<CR>
+let g:tagbar_width = 75 
+let g:tagbar_autofocus = 1
+let g:tagbar_autoclose = 0
