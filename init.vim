@@ -69,6 +69,9 @@ set showcmd
 
 set wildignore+=*.orig,*.pyc
 
+" tags
+set tags=./tags,tags
+
 " tabs
 set tabstop=8
 set softtabstop=4
@@ -210,6 +213,7 @@ nnoremap X VX
 
 " d rest of line
 nnoremap dr d$
+nnoremap cr c$
 
 " delete without yank by default
 nnoremap d "_d
@@ -284,8 +288,14 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isT
 " ignore .pyc
 let NERDTreeIgnore = ['\.pyc$']
 
+" YCM
+let g:ycm_autoclose_preview_window_after_insertion = 1
+let g:ycm_autoclose_preview_window_after_completion = 1
+
 " tagbar
 nmap <C-t> :TagbarToggle<CR>
 let g:tagbar_width = 75 
 let g:tagbar_autofocus = 1
 let g:tagbar_autoclose = 0
+
+ab ipdb import ipdb; ipdb.set_trace()
