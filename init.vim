@@ -211,9 +211,10 @@ nnoremap yy y$
 " big cut
 nnoremap X VX
 
-" d rest of line
+" rest of line shortkeys
 nnoremap dr d$
 nnoremap cr c$
+nnoremap yr y$
 
 " delete without yank by default
 nnoremap d "_d
