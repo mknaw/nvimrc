@@ -83,6 +83,7 @@ set smartindent
 filetype indent on
 
 set splitright
+set splitbelow
 
 set showmatch
 
@@ -274,10 +275,6 @@ endif
 " giant steps
 nnoremap J 10j
 vnoremap J 10j
-nnoremap <C-J> <C-D>
-vnoremap <C-J> <C-D>
-nnoremap <C-K> <C-U>
-vnoremap <C-K> <C-U>
 nnoremap K 10k
 vnoremap K 10k
 
