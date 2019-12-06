@@ -218,7 +218,7 @@ nnoremap yr y$
 
 " delete without yank by default
 nnoremap d "_d
-vnoremap d "_d
+nnoremap d "_d
 nnoremap c "_c
 vnoremap c "_c
 nnoremap x "_x
@@ -227,6 +227,7 @@ nnoremap x "_x
 vnoremap <C-C> "*y
 
 " visual search + replace
+vnoremap <C-f> "hy:/<C-r>h
 vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>
 
 " global vimgrep
@@ -273,11 +274,19 @@ endif
 " giant steps
 nnoremap J 10j
 vnoremap J 10j
+nnoremap <C-J> <C-D>
+vnoremap <C-J> <C-D>
+nnoremap <C-K> <C-U>
+vnoremap <C-K> <C-U>
 nnoremap K 10k
 vnoremap K 10k
 
+" bol / eol shortkeys
+map <C-u> ^
+map <C-p> $
+
 " merge lines with L
-nnoremap L J
+nnoremap L j
 
 " NERDTree
 map <C-n> :NERDTreeToggle<CR>
@@ -296,7 +305,6 @@ let g:ycm_autoclose_preview_window_after_completion = 1
 " tagbar
 nmap <C-t> :TagbarToggle<CR>
 let g:tagbar_width = 75 
-let g:tagbar_autofocus = 1
 let g:tagbar_autoclose = 0
 
 ab ipdb import ipdb; ipdb.set_trace()
