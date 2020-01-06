@@ -95,6 +95,15 @@ set wrap!
 " airline
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
+nnoremap <space>1 :1tabn<CR>
+nnoremap <space>2 :2tabn<CR>
+nnoremap <space>3 :3tabn<CR>
+nnoremap <space>4 :4tabn<CR>
+nnoremap <space>5 :5tabn<CR>
+nnoremap <space>6 :6tabn<CR>
+nnoremap <space>7 :7tabn<CR>
+nnoremap <space>8 :8tabn<CR>
+nnoremap <space>9 :9tabn<CR>
 
 " theme
 colorscheme ayu
@@ -212,19 +221,21 @@ nnoremap yy y$
 " big cut
 nnoremap X VX
 
+" delete without yank by default
+nnoremap d "_d
+vnoremap d "_d
+nnoremap c "_c
+vnoremap c "_c
+nnoremap x "_x
+
 " rest of line shortkeys
 nnoremap dr d$
 nnoremap cr c$
 nnoremap yr y$
 
-" delete without yank by default
-nnoremap d "_d
-nnoremap d "_d
-nnoremap c "_c
-vnoremap c "_c
-nnoremap x "_x
-
-" copy to clipboard in visual
+" copy to clipboard in general
+nnoremap y "*y
+vnoremap y "*y
 vnoremap <C-C> "*y
 
 " visual search + replace
@@ -233,9 +244,6 @@ vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>
 
 " global vimgrep
 nnoremap \ :Ag<SPACE>
-
-" toggle gundo
-nnoremap <space>u :GundoToggle<CR>
 
 " splits
 " move more sensibly
@@ -279,11 +287,11 @@ nnoremap K 10k
 vnoremap K 10k
 
 " bol / eol shortkeys
-map <C-u> ^
+map <C-o> ^
 map <C-p> $
 
 " merge lines with L
-nnoremap L j
+nnoremap L J
 
 " NERDTree
 map <C-n> :NERDTreeToggle<CR>
@@ -293,7 +301,7 @@ map <C-n> :NERDTreeToggle<CR>
 " close if only NERDTree left
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " ignore .pyc
-let NERDTreeIgnore = ['\.pyc$']
+let NERDTreeIgnore = ['\.pyc$', '\.orig$']
 
 " YCM
 let g:ycm_autoclose_preview_window_after_insertion = 1
@@ -304,4 +312,5 @@ nmap <C-t> :TagbarToggle<CR>
 let g:tagbar_width = 75 
 let g:tagbar_autoclose = 0
 
-ab ipdb import ipdb; ipdb.set_trace()
+nnoremap ipdb Oimport ipdb; ipdb.set_trace()<ESC>
+
