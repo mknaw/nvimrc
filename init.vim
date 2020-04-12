@@ -74,14 +74,24 @@ set wildignore+=*.orig,*.pyc
 set tags=./tags,tags
 
 " tabs
-set tabstop=8
-set softtabstop=4
-set expandtab
-set shiftwidth=4
 set autoindent
 set smartindent
-
 filetype indent on
+
+fu! SetTabs()
+  " toggle between 2 & 4 spaces for tabs
+  if !exists('s:tabwidth') || s:tabwidth == 2
+    let s:tabwidth = 4
+  else
+    let s:tabwidth = 2
+  endif
+  let &softtabstop = s:tabwidth
+  let &shiftwidth = s:tabwidth
+  set expandtab
+endfunction
+
+call SetTabs()
+nmap ,t :silent call SetTabs()<CR>
 
 set splitright
 set splitbelow
@@ -91,6 +101,7 @@ set showmatch
 set autoread
 
 " quickfix across whole width even in vsplit
+" TODO check if this actually works...
 botright cwindow
 
 " wrapping
