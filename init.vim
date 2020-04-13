@@ -23,7 +23,6 @@ Plugin 'scrooloose/nerdcommenter'
 Plugin 'neomake/neomake'
 Plugin 'junegunn/fzf'
 Plugin 'mileszs/ack.vim'
-Plugin 'rking/ag.vim'
 Plugin 'Shougo/neocomplete.vim'
 Plugin 'Townk/vim-autoclose'
 Plugin 'chrisbra/csv.vim'
@@ -53,10 +52,12 @@ Plugin 'joshdick/onedark.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 
+Plugin 'mknaw/fipp.vim'
+
 call vundle#end()
 filetype plugin indent on
 
-source ~/.config/nvim/plugin/matchit.vim
+" source ~/.config/nvim/plugin/matchit.vim
 
 """"""""""""""
 """ CONFIG
@@ -76,14 +77,24 @@ set wildignore+=*.orig,*.pyc
 set tags=./tags,tags
 
 " tabs
-set tabstop=8
-set softtabstop=4
-set expandtab
-set shiftwidth=4
 set autoindent
 set smartindent
-
 filetype indent on
+
+fu! SetTabs()
+  " toggle between 2 & 4 spaces for tabs
+  if !exists('s:tabwidth') || s:tabwidth == 2
+    let s:tabwidth = 4
+  else
+    let s:tabwidth = 2
+  endif
+  let &softtabstop = s:tabwidth
+  let &shiftwidth = s:tabwidth
+  set expandtab
+endfunction
+
+call SetTabs()
+nmap ,t :silent call SetTabs()<CR>
 
 set splitright
 set splitbelow
@@ -91,6 +102,10 @@ set splitbelow
 set showmatch
 
 set autoread
+
+" quickfix across whole width even in vsplit
+" TODO check if this actually works...
+botright cwindow
 
 " wrapping
 set wrap!
@@ -152,6 +167,8 @@ augroup END
 if executable('ag')
   let g:ackprg = 'ag --vimgrep'
 endif
+nnoremap \ :Ack!<SPACE>
+
 
 " Ale
 let g:airline#extensions#ale#enabled = 1
@@ -256,9 +273,6 @@ vnoremap <C-C> "*y
 " visual search + replace
 vnoremap <C-f> "hy:/<C-r>h
 vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>
-
-" global vimgrep
-nnoremap \ :Ag<SPACE>
 
 " splits
 " move more sensibly
