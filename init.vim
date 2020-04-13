@@ -33,6 +33,7 @@ Plugin 'phleet/vim-mercenary'
 " Plugin 'mattn/emmet-vim'
 Plugin 'kshenoy/vim-signature'
 Plugin 'christoomey/vim-sort-motion'
+Plugin 'sloria/vim-ped'
 
 " syntax
 Plugin 'ycm-core/YouCompleteMe'
@@ -64,6 +65,8 @@ source ~/.config/nvim/plugin/matchit.vim
 filetype plugin on
 
 autocmd BufEnter * :syntax sync fromstart
+:syntax sync minlines=10000
+set redrawtime=10000
 
 set showcmd
 
@@ -135,6 +138,7 @@ set colorcolumn=120
 set laststatus=2
 
 let g:python_host_prog = '/usr/local/bin/python2'
+let g:python3_host_prog = "/usr/local/bin/python3"
 
 " code folding
 set foldmethod=indent
@@ -179,6 +183,9 @@ set rtp+=/usr/local/opt/fzf
 " - down / up / left / right
 let g:fzf_layout = { 'down': '~40%' }
 
+" FAR
+let g:far#source = 'agnvim'
+
 " Customize fzf colors to match your color scheme
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
@@ -198,9 +205,14 @@ let g:fzf_colors =
 " let g:quickr_preview_on_cursor = 1
 
 " emmet
-let g:user_emmet_install_global = 0
-autocmd FileType html,css EmmetInstall
-let g:user_emmet_leader_key='<C-X>'
+" let g:user_emmet_install_global = 0
+" autocmd FileType html,css EmmetInstall
+" let g:user_emmet_leader_key='<C-X>'
+
+let g:netrw_banner = 0
+let g:netrw_liststyle = 3
+
+let g:ped_edit_command = 'tabedit'
 
 """""""""""""""
 """ COMMANDS   
@@ -214,6 +226,8 @@ command! Vimrc tabe ~/.config/nvim/init.vim
 nnoremap <silent> ,<space> :noh<CR>
 nnoremap <silent> <space>, :syntax sync fromstart<CR>
 inoremap jj <ESC>
+
+vnoremap $ $h
 
 " eol yank without newline
 nnoremap yy y$
@@ -229,9 +243,10 @@ vnoremap c "_c
 nnoremap x "_x
 
 " rest of line shortkeys
-nnoremap dr d$
-nnoremap cr c$
-nnoremap yr y$
+nnoremap dr "_d$h
+nnoremap cr c$h
+nnoremap yr y$h
+nnoremap vr v$h
 
 " copy to clipboard in general
 nnoremap y "*y
@@ -313,4 +328,9 @@ let g:tagbar_width = 75
 let g:tagbar_autoclose = 0
 
 nnoremap ipdb Oimport ipdb; ipdb.set_trace()<ESC>
+
+" just do the obvious thing
+command! W w
+command! Wq wq
+command! Vs vs
 
