@@ -21,6 +21,7 @@ Plugin 'brooth/far.vim'
 Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'neomake/neomake'
+" TODO fix this
 Plugin 'junegunn/fzf'
 Plugin 'mileszs/ack.vim'
 Plugin 'Shougo/neocomplete.vim'
@@ -29,10 +30,12 @@ Plugin 'chrisbra/csv.vim'
 " Plugin 'ronakg/quickr-preview.vim'
 Plugin 'tpope/vim-surround'
 Plugin 'phleet/vim-mercenary'
-" Plugin 'mattn/emmet-vim'
+Plugin 'mattn/emmet-vim'
 Plugin 'kshenoy/vim-signature'
 Plugin 'christoomey/vim-sort-motion'
 Plugin 'sloria/vim-ped'
+Plugin 'tpope/vim-fugitive'
+Plugin 'airblade/vim-gitgutter'
 
 " syntax
 Plugin 'ycm-core/YouCompleteMe'
@@ -51,6 +54,7 @@ Plugin 'matveyt/vim-modest'
 Plugin 'joshdick/onedark.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+Plugin 'frazrepo/vim-rainbow'
 
 Plugin 'mknaw/fipp.vim'
 
@@ -153,7 +157,7 @@ set colorcolumn=120
 set laststatus=2
 
 let g:python_host_prog = '/usr/local/bin/python2'
-let g:python3_host_prog = "/usr/local/bin/python3"
+let g:python3_host_prog = '/usr/local/bin/python3'
 
 " code folding
 set foldmethod=indent
@@ -222,14 +226,16 @@ let g:fzf_colors =
 " let g:quickr_preview_on_cursor = 1
 
 " emmet
-" let g:user_emmet_install_global = 0
-" autocmd FileType html,css EmmetInstall
-" let g:user_emmet_leader_key='<C-X>'
+"let g:user_emmet_install_global = 0
+"autocmd FileType html,css EmmetInstall
+let g:user_emmet_leader_key='<C-X>'
 
 let g:netrw_banner = 0
 let g:netrw_liststyle = 3
 
 let g:ped_edit_command = 'tabedit'
+
+set statusline+=%{FugitiveStatusline()}
 
 """""""""""""""
 """ COMMANDS   
@@ -242,6 +248,7 @@ command! Vimrc tabe ~/.config/nvim/init.vim
 
 nnoremap <silent> ,<space> :noh<CR>
 nnoremap <silent> <space>, :syntax sync fromstart<CR>
+
 inoremap jj <ESC>
 
 vnoremap $ $h
@@ -266,6 +273,7 @@ nnoremap yr y$h
 nnoremap vr v$h
 
 " copy to clipboard in general
+" TODO have to fix this so it copies to clipboard -and- to register.
 nnoremap y "*y
 vnoremap y "*y
 vnoremap <C-C> "*y
@@ -346,5 +354,6 @@ nnoremap ipdb Oimport ipdb; ipdb.set_trace()<ESC>
 " just do the obvious thing
 command! W w
 command! Wq wq
+command! Q q
 command! Vs vs
 
