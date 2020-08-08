@@ -39,12 +39,14 @@ Plugin 'airblade/vim-gitgutter'
 
 " syntax
 Plugin 'ycm-core/YouCompleteMe'
+Plugin 'lervag/vimtex'
 "Plugin 'vim-syntastic/syntastic'
 Plugin 'w0rp/ale'
 " Plugin 'vim-python/python-syntax'
 Plugin 'kh3phr3n/python-syntax'
 Plugin 'eagletmt/ghcmod-vim'
 Plugin 'Shougo/vimproc'
+Plugin 'rust-lang/rust.vim'
 
 " aesthetics
 Plugin 'flazz/vim-colorschemes'
@@ -54,6 +56,7 @@ Plugin 'matveyt/vim-modest'
 Plugin 'joshdick/onedark.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+Plugin 'enricobacis/vim-airline-clock'
 Plugin 'frazrepo/vim-rainbow'
 
 Plugin 'mknaw/fipp.vim'
@@ -66,6 +69,10 @@ filetype plugin indent on
 """"""""""""""
 """ CONFIG
 """"""""""""""
+
+let mapleader="\\"
+
+let g:airline#extensions#clock#format = '%H:%M'
 
 filetype plugin on
 
@@ -289,10 +296,10 @@ nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 " resize panels
-nnoremap <silent> <space>j :exe "resize " . (winheight(0) * 3/2)<CR>
-nnoremap <silent> <space>k :exe "resize " . (winheight(0) * 2/3)<CR>
-nnoremap <silent> <space>h :exe "vertical resize " . (winwidth(0) * 3/2)<CR>
-nnoremap <silent> <space>l :exe "vertical resize " . (winwidth(0) * 2/3)<CR>
+nnoremap <silent> <space>j :exe "resize " . (&lines * 3/2)<CR>
+nnoremap <silent> <space>k :exe "resize " . (&lines * 2/3)<CR>
+nnoremap <silent> <space>h :exe "vertical resize " . (&columns * 3/2)<CR>
+nnoremap <silent> <space>l :exe "vertical resize " . (&columns * 2/3)<CR>
 
 " tab traversal
 nnoremap <C-H><C-H> gT
@@ -339,6 +346,10 @@ map <C-n> :NERDTreeToggle<CR>
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " ignore .pyc
 let NERDTreeIgnore = ['\.pyc$', '\.orig$']
+
+" NERDcommenter
+let g:NERDSpaceDelims = 1
+let g:NERDCustomDelimiters = { 'django': { 'left': '{#', 'right': '#}', 'leftAlt': '{% comment %}', 'rightAlt': '{% endcomment %}' } }
 
 " YCM
 let g:ycm_autoclose_preview_window_after_insertion = 1
