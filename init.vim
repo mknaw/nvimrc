@@ -39,14 +39,17 @@ Plugin 'airblade/vim-gitgutter'
 
 " syntax
 Plugin 'ycm-core/YouCompleteMe'
-Plugin 'lervag/vimtex'
+" Plugin 'lervag/vimtex'
 "Plugin 'vim-syntastic/syntastic'
-Plugin 'w0rp/ale'
+Plugin 'dense-analysis/ale'
 " Plugin 'vim-python/python-syntax'
 Plugin 'kh3phr3n/python-syntax'
 Plugin 'eagletmt/ghcmod-vim'
 Plugin 'Shougo/vimproc'
 Plugin 'rust-lang/rust.vim'
+Plugin 'leafgarland/typescript-vim'
+Plugin 'peitalin/vim-jsx-typescript'
+Plugin 'elixir-editors/vim-elixir'
 
 " aesthetics
 Plugin 'flazz/vim-colorschemes'
@@ -135,8 +138,10 @@ nnoremap <space>8 :8tabn<CR>
 nnoremap <space>9 :9tabn<CR>
 
 " theme
-colorscheme ayu
-set background=dark
+" colorscheme ayu
+" set background=dark
+colorscheme gruvbox
+set background=light
 " let g:gruvbox_termcolors = 256
 set termguicolors
 
@@ -158,7 +163,10 @@ set mouse=n
 set number
 set ruler
 " margin
-set colorcolumn=120
+set colorcolumn=110
+au BufNewFile,BufRead *.js setlocal colorcolumn=80
+au BufNewFile,BufRead *.ts setlocal colorcolumn=80
+au BufNewFile,BufRead *.tsx setlocal colorcolumn=80
 
 " always display the status line
 set laststatus=2
@@ -191,9 +199,11 @@ let g:ale_echo_msg_error_str = 'E'
 let g:ale_echo_msg_warning_str = 'W'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_linters = {
-\            'python': ['flake8'],
-\            'javascript': ['eslint'],
+\   'python': ['flake8'],
+\   'javascript': ['eslint'],
+\   'typescript': ['eslint'],
 \}
+
 
 " Syntastic
 "set statusline+=%#warningmsg#
@@ -368,3 +378,4 @@ command! Wq wq
 command! Q q
 command! Vs vs
 
+autocmd FileType qf setlocal wrap
