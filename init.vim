@@ -5,6 +5,8 @@ set nocompatible              " be iMproved, required
 syntax on
 set encoding=utf8
 
+set shell=zsh
+
 """"""""""""""""""""""
 """ VUNDLE PLUGINS
 """"""""""""""""""""""
@@ -21,12 +23,18 @@ Plugin 'brooth/far.vim'
 Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'neomake/neomake'
-" TODO fix this
-Plugin 'junegunn/fzf'
+Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plugin 'junegunn/fzf.vim'
+" TODO this would work if it could do Lines.
+" I think I will have to submit the PR.
+" Plugin 'chengzeyi/fzf-preview.vim'
+" Plugin 'yuki-yano/fzf-preview.vim'
 Plugin 'mileszs/ack.vim'
 Plugin 'Shougo/neocomplete.vim'
 Plugin 'Townk/vim-autoclose'
 Plugin 'chrisbra/csv.vim'
+Plugin 'kana/vim-textobj-user'
+Plugin 'chaoren/vim-wordmotion'
 " Plugin 'ronakg/quickr-preview.vim'
 Plugin 'tpope/vim-surround'
 Plugin 'phleet/vim-mercenary'
@@ -36,6 +44,9 @@ Plugin 'christoomey/vim-sort-motion'
 Plugin 'sloria/vim-ped'
 Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
+Plugin 'yssl/QFEnter'
+Plugin 'SirVer/ultisnips'
+Plugin 'honza/vim-snippets'
 
 " syntax
 Plugin 'ycm-core/YouCompleteMe'
@@ -49,11 +60,8 @@ Plugin 'Shougo/vimproc'
 Plugin 'rust-lang/rust.vim'
 
 " aesthetics
-Plugin 'flazz/vim-colorschemes'
 Plugin 'morhetz/gruvbox'
 Plugin 'ayu-theme/ayu-vim'
-Plugin 'matveyt/vim-modest'
-Plugin 'joshdick/onedark.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'enricobacis/vim-airline-clock'
@@ -65,6 +73,8 @@ call vundle#end()
 filetype plugin indent on
 
 " source ~/.config/nvim/plugin/matchit.vim
+source ~/.config/nvim/plugin/argtextobj.vim
+" source ~/.config/nvim/plugin/camelcasemotion.vim
 
 """"""""""""""
 """ CONFIG
@@ -124,6 +134,8 @@ set wrap!
 " airline
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
+
+" TODO pretty much never even use this
 nnoremap <space>1 :1tabn<CR>
 nnoremap <space>2 :2tabn<CR>
 nnoremap <space>3 :3tabn<CR>
@@ -205,16 +217,14 @@ let g:ale_linters = {
 "let g:syntastic_check_on_wq = 1
 "let g:syntastic_py_checkers = ['flake8']
 
-" FZF
-set rtp+=/usr/local/opt/fzf
-" Default fzf layout
-" - down / up / left / right
-let g:fzf_layout = { 'down': '~40%' }
-
 " FAR
 let g:far#source = 'agnvim'
 
-" Customize fzf colors to match your color scheme
+" FZF
+set rtp+=/usr/local/opt/fzf
+
+" Default fzf layout
+let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.8 } }
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
   \ 'bg':      ['bg', 'Normal'],
@@ -229,13 +239,19 @@ let g:fzf_colors =
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
+let g:fzf_history_dir = '~/.local/share/fzf-history'
+let g:fzf_preview_window = ['right:50%', 'ctrl-/']
+nnoremap ,f :FZF<CR>
+nnoremap ,ff :Buffers<CR>
+nnoremap ,l :Lines<CR>
+
 " quickr preview on cursor
 " let g:quickr_preview_on_cursor = 1
 
 " emmet
-"let g:user_emmet_install_global = 0
-"autocmd FileType html,css EmmetInstall
-let g:user_emmet_leader_key='<C-X>'
+" let g:user_emmet_install_global = 0
+" autocmd FileType html,css EmmetInstall
+let g:user_emmet_leader_key='<C-y>'
 
 let g:netrw_banner = 0
 let g:netrw_liststyle = 3
@@ -248,6 +264,8 @@ set statusline+=%{FugitiveStatusline()}
 """ COMMANDS   
 """""""""""""""
 command! Vimrc tabe ~/.config/nvim/init.vim
+
+command! F FZF
 
 """"""""""""""""""
 """ KEYMAPPINGS
@@ -337,6 +355,19 @@ map <C-p> $
 " merge lines with L
 nnoremap L J
 
+" repeat previous cmd
+noremap <C-P> @:<CR>
+
+" wordmotion
+let g:wordmotion_mappings = {
+\ 'w' : ',w',
+\ 'b' : ',b',
+\ 'e' : ',e',
+\ 'ge' : 'g,e',
+\ 'aw' : 'a,w',
+\ 'iw' : 'i,w',
+\ }
+
 " NERDTree
 map <C-n> :NERDTreeToggle<CR>
 " open on startup
@@ -368,3 +399,10 @@ command! Wq wq
 command! Q q
 command! Vs vs
 
+" let g:fzf_action = {
+  " \ 'ctrl-v': 'vsplit' }
+  "
+let g:UltiSnipsExpandTrigger="<c-s>"
+let g:UltiSnipsListSnippets="<c-_>"
+let g:UltiSnipsJumpForwardTrigger="<c-j>"
+let g:UltiSnipsJumpBackwardTrigger="<c-k>"
