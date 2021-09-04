@@ -25,9 +25,6 @@ Plugin 'scrooloose/nerdcommenter'
 Plugin 'neomake/neomake'
 Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plugin 'junegunn/fzf.vim'
-" TODO this would work if it could do Lines.
-" I think I will have to submit the PR.
-" Plugin 'chengzeyi/fzf-preview.vim'
 " Plugin 'yuki-yano/fzf-preview.vim'
 Plugin 'mileszs/ack.vim'
 Plugin 'Shougo/neocomplete.vim'
@@ -214,7 +211,9 @@ let g:ale_linters = {
 \   'python': ['flake8'],
 \   'javascript': ['eslint'],
 \   'typescript': ['eslint'],
+\   'elixir': ['elixir-ls'],
 \}
+let g:ale_elixir_elixir_ls_release = expand("~/.elixir-ls/rel/")
 
 
 " Syntastic
@@ -254,6 +253,16 @@ let g:fzf_preview_window = ['right:50%', 'ctrl-/']
 nnoremap ,f :FZF<CR>
 nnoremap ,ff :Buffers<CR>
 nnoremap ,l :Lines<CR>
+
+" TODO would be good to read the `g:fzf_preview_window` var instead of
+"      repeating here.
+command! -bang -nargs=* LinesWithPreview
+    \ call fzf#vim#grep(
+    \   'rg --with-filename --column --line-number --no-heading --color=always --smart-case . '.fnameescape(expand('%')), 1,
+    \   fzf#vim#with_preview({
+    \       'options': '--delimiter : --no-sort'}),
+    \   0)
+nnoremap H :LinesWithPreview<CR>
 
 " quickr preview on cursor
 " let g:quickr_preview_on_cursor = 1
@@ -415,3 +424,6 @@ let g:UltiSnipsExpandTrigger="<c-s>"
 let g:UltiSnipsListSnippets="<c-_>"
 let g:UltiSnipsJumpForwardTrigger="<c-j>"
 let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+
+nnoremap gd :Gdiffsplit<CR>
+nnoremap gm :GMove 
