@@ -20,13 +20,13 @@ Plugin 'VundleVim/Vundle.vim'
 " utility
 Plugin 'scrooloose/nerdtree'
 Plugin 'brooth/far.vim'
-Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'neomake/neomake'
 Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plugin 'junegunn/fzf.vim'
 " Plugin 'yuki-yano/fzf-preview.vim'
 Plugin 'mileszs/ack.vim'
+Plugin 'jremmen/vim-ripgrep'
 Plugin 'Shougo/neocomplete.vim'
 Plugin 'Townk/vim-autoclose'
 Plugin 'chrisbra/csv.vim'
@@ -44,6 +44,8 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'yssl/QFEnter'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
+Plugin 'AndrewRadev/splitjoin.vim'
+Plugin 'ludovicchabant/vim-gutentags' " TODO figure out how to gen tags for site-packages
 
 " syntax
 Plugin 'ycm-core/YouCompleteMe'
@@ -58,6 +60,7 @@ Plugin 'rust-lang/rust.vim'
 Plugin 'leafgarland/typescript-vim'
 Plugin 'peitalin/vim-jsx-typescript'
 Plugin 'elixir-editors/vim-elixir'
+Plugin 'tweekmonster/django-plus.vim'
 
 " aesthetics
 Plugin 'morhetz/gruvbox'
@@ -115,7 +118,7 @@ fu! SetTabs()
 endfunction
 
 call SetTabs()
-nmap ,t :silent call SetTabs()<CR>
+nmap <C-t> :silent call SetTabs()<CR>
 
 set splitright
 set splitbelow
@@ -147,10 +150,10 @@ nnoremap <space>8 :8tabn<CR>
 nnoremap <space>9 :9tabn<CR>
 
 " theme
-" colorscheme ayu
+colorscheme ayu
 " set background=dark
-colorscheme gruvbox
-set background=light
+" colorscheme gruvbox
+" set background=light
 " let g:gruvbox_termcolors = 256
 set termguicolors
 
@@ -173,6 +176,7 @@ set number
 set ruler
 " margin
 set colorcolumn=110
+au BufNewFile,BufRead *.py setlocal colorcolumn=120
 au BufNewFile,BufRead *.js setlocal colorcolumn=80
 au BufNewFile,BufRead *.ts setlocal colorcolumn=80
 au BufNewFile,BufRead *.tsx setlocal colorcolumn=80
@@ -191,12 +195,12 @@ augroup OpenAllFoldsOnFileOpen
     autocmd BufRead * normal zR
 augroup END
 
-" Ack
-if executable('ag')
-  let g:ackprg = 'ag --vimgrep'
-endif
-nnoremap \ :Ack!<SPACE>
+nnoremap \ :Rg<SPACE>
 
+let g:far#source = 'rg'
+let g:far#default_file_mask = '/'
+let g:far#window_width = 120
+vnoremap <C-g> "hy:Far<SPACE><C-r>h<SPACE>
 
 " Ale
 let g:airline#extensions#ale#enabled = 1
@@ -243,7 +247,7 @@ let g:fzf_colors =
   \ 'hl+':     ['fg', 'Statement'],
   \ 'info':    ['fg', 'PreProc'],
   \ 'prompt':  ['fg', 'Conditional'],
-  \ 'pointer': ['fg', 'Exception'],
+  \ 'pointer': ['fg', 'Conditional'],
   \ 'marker':  ['fg', 'Keyword'],
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
@@ -253,6 +257,19 @@ let g:fzf_preview_window = ['right:50%', 'ctrl-/']
 nnoremap ,f :FZF<CR>
 nnoremap ,ff :Buffers<CR>
 nnoremap ,l :Lines<CR>
+nnoremap ,t :Tags<CR>
+
+function! s:build_quickfix_list(lines)
+  call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
+  copen
+  cc
+endfunction
+
+let g:fzf_action = {
+  \ 'ctrl-q': function('s:build_quickfix_list'),
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-x': 'split',
+  \ 'ctrl-v': 'vsplit' }
 
 " TODO would be good to read the `g:fzf_preview_window` var instead of
 "      repeating here.
@@ -278,6 +295,7 @@ let g:netrw_liststyle = 3
 let g:ped_edit_command = 'tabedit'
 
 set statusline+=%{FugitiveStatusline()}
+set diffopt+=vertical
 
 """""""""""""""
 """ COMMANDS   
@@ -323,7 +341,6 @@ vnoremap y "*y
 vnoremap <C-C> "*y
 
 " visual search + replace
-vnoremap <C-f> "hy:/<C-r>h
 vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>
 
 " splits
@@ -374,9 +391,6 @@ map <C-p> $
 " merge lines with L
 nnoremap L J
 
-" repeat previous cmd
-noremap <C-P> @:<CR>
-
 " wordmotion
 let g:wordmotion_mappings = {
 \ 'w' : ',w',
@@ -405,11 +419,6 @@ let g:NERDCustomDelimiters = { 'django': { 'left': '{#', 'right': '#}', 'leftAlt
 let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_autoclose_preview_window_after_completion = 1
 
-" tagbar
-nmap <C-t> :TagbarToggle<CR>
-let g:tagbar_width = 75 
-let g:tagbar_autoclose = 0
-
 nnoremap ipdb Oimport ipdb; ipdb.set_trace()<ESC>
 
 " just do the obvious thing
@@ -424,6 +433,17 @@ let g:UltiSnipsExpandTrigger="<c-s>"
 let g:UltiSnipsListSnippets="<c-_>"
 let g:UltiSnipsJumpForwardTrigger="<c-j>"
 let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-
+let g:UltiSnipsSnippetDirectories=["UltiSnips", $HOME."/.vim/snippets"] 
 nnoremap gd :Gdiffsplit<CR>
 nnoremap gm :GMove 
+
+let g:user_emmet_settings = {
+\  'html' : {
+\    'block_all_childless' : 1,
+\  },
+\}
+
+let g:qfenter_keymap = {
+\ 'vopen': ['<C-v>'],
+\ 'topen': ['<C-t>'],
+\}
