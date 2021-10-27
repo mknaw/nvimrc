@@ -11,69 +11,56 @@ set shell=zsh
 """ VUNDLE PLUGINS
 """"""""""""""""""""""
 
-filetype off
-
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
+call plug#begin('~/.vim/plugged')
 
 " utility
-Plugin 'scrooloose/nerdtree'
-Plugin 'brooth/far.vim'
-Plugin 'scrooloose/nerdcommenter'
-Plugin 'neomake/neomake'
-Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plugin 'junegunn/fzf.vim'
-" Plugin 'yuki-yano/fzf-preview.vim'
-Plugin 'mileszs/ack.vim'
-Plugin 'jremmen/vim-ripgrep'
-Plugin 'Shougo/neocomplete.vim'
-Plugin 'Townk/vim-autoclose'
-Plugin 'chrisbra/csv.vim'
-Plugin 'kana/vim-textobj-user'
-Plugin 'chaoren/vim-wordmotion'
-" Plugin 'ronakg/quickr-preview.vim'
-Plugin 'tpope/vim-surround'
-Plugin 'phleet/vim-mercenary'
-Plugin 'mattn/emmet-vim'
-Plugin 'kshenoy/vim-signature'
-Plugin 'christoomey/vim-sort-motion'
-Plugin 'sloria/vim-ped'
-Plugin 'tpope/vim-fugitive'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'yssl/QFEnter'
-Plugin 'SirVer/ultisnips'
-Plugin 'honza/vim-snippets'
-Plugin 'AndrewRadev/splitjoin.vim'
-Plugin 'ludovicchabant/vim-gutentags' " TODO figure out how to gen tags for site-packages
+Plug 'kyazdani42/nvim-tree.lua'
+Plug 'kyazdani42/nvim-web-devicons'
+Plug 'brooth/far.vim'
+Plug 'scrooloose/nerdcommenter'
+" Plug 'neomake/neomake'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+" Plug 'yuki-yano/fzf-preview.vim'
+Plug 'mileszs/ack.vim'
+Plug 'jremmen/vim-ripgrep'
+" Plug 'Shougo/neocomplete.vim'
+Plug 'jiangmiao/auto-pairs'
+Plug 'chrisbra/csv.vim'
+Plug 'kana/vim-textobj-user'
+Plug 'chaoren/vim-wordmotion'
+" Plug 'ronakg/quickr-preview.vim'
+Plug 'tpope/vim-surround'
+Plug 'mattn/emmet-vim'
+Plug 'kshenoy/vim-signature'
+Plug 'christoomey/vim-sort-motion'
+Plug 'yssl/QFEnter'
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+Plug 'AndrewRadev/splitjoin.vim'
+Plug 'ludovicchabant/vim-gutentags' " TODO figure out how to gen tags for site-packages
+
+" VCS
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
 
 " syntax
-Plugin 'ycm-core/YouCompleteMe'
-" Plugin 'lervag/vimtex'
-"Plugin 'vim-syntastic/syntastic'
-Plugin 'dense-analysis/ale'
-" Plugin 'vim-python/python-syntax'
-Plugin 'kh3phr3n/python-syntax'
-Plugin 'eagletmt/ghcmod-vim'
-Plugin 'Shougo/vimproc'
-Plugin 'rust-lang/rust.vim'
-Plugin 'leafgarland/typescript-vim'
-Plugin 'peitalin/vim-jsx-typescript'
-Plugin 'elixir-editors/vim-elixir'
-Plugin 'tweekmonster/django-plus.vim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'kh3phr3n/python-syntax'
+" Plug 'eagletmt/ghcmod-vim'
+" Plug 'Shougo/vimproc'
+" Plug 'rust-lang/rust.vim'
+" Plug 'leafgarland/typescript-vim'
+" Plug 'peitalin/vim-jsx-typescript'
+" Plug 'elixir-editors/vim-elixir'
+" Plug 'tweekmonster/django-plus.vim'
 
 " aesthetics
-Plugin 'morhetz/gruvbox'
-Plugin 'ayu-theme/ayu-vim'
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
-Plugin 'enricobacis/vim-airline-clock'
-Plugin 'frazrepo/vim-rainbow'
+" Plug 'morhetz/gruvbox'
+Plug 'ayu-theme/ayu-vim'
+Plug 'nvim-lualine/lualine.nvim'
 
-Plugin 'mknaw/fipp.vim'
-
-call vundle#end()
-filetype plugin indent on
+call plug#end()
 
 " source ~/.config/nvim/plugin/matchit.vim
 source ~/.config/nvim/plugin/argtextobj.vim
@@ -87,7 +74,7 @@ let mapleader="\\"
 
 let g:airline#extensions#clock#format = '%H:%M'
 
-filetype plugin on
+" filetype plugin on
 
 autocmd BufEnter * :syntax sync fromstart
 :syntax sync minlines=10000
@@ -133,10 +120,6 @@ botright cwindow
 
 " wrapping
 set wrap!
-
-" airline
-let g:airline#extensions#tabline#enabled = 1
-let g:airline_powerline_fonts = 1
 
 " TODO pretty much never even use this
 nnoremap <space>1 :1tabn<CR>
@@ -255,7 +238,7 @@ let g:fzf_colors =
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 let g:fzf_preview_window = ['right:50%', 'ctrl-/']
 nnoremap ,f :FZF<CR>
-nnoremap ,ff :Buffers<CR>
+" nnoremap ,ff :Buffers<CR>
 nnoremap ,l :Lines<CR>
 nnoremap ,t :Tags<CR>
 
@@ -294,7 +277,7 @@ let g:netrw_liststyle = 3
 
 let g:ped_edit_command = 'tabedit'
 
-set statusline+=%{FugitiveStatusline()}
+" set statusline+=%{FugitiveStatusline()}
 set diffopt+=vertical
 
 """""""""""""""
@@ -401,16 +384,6 @@ let g:wordmotion_mappings = {
 \ 'iw' : 'i,w',
 \ }
 
-" NERDTree
-map <C-n> :NERDTreeToggle<CR>
-" open on startup
-"autocmd vimenter * NERDTree
-"au VimEnter * wincmd l
-" close if only NERDTree left
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-" ignore .pyc
-let NERDTreeIgnore = ['\.pyc$', '\.orig$']
-
 " NERDcommenter
 let g:NERDSpaceDelims = 1
 let g:NERDCustomDelimiters = { 'django': { 'left': '{#', 'right': '#}', 'leftAlt': '{% comment %}', 'rightAlt': '{% endcomment %}' } }
@@ -447,3 +420,86 @@ let g:qfenter_keymap = {
 \ 'vopen': ['<C-v>'],
 \ 'topen': ['<C-t>'],
 \}
+
+" CoC config
+set updatetime=300
+
+if has("nvim-0.5.0") || has("patch-8.1.1564")
+  " Recently vim can merge signcolumn and number column into one
+  set signcolumn=number
+else
+  set signcolumn=yes
+endif
+
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use `[g` and `]g` to navigate diagnostics
+" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+nnoremap <space>a  :<C-u>CocList diagnostics<cr>
+
+" LuaLine config
+lua << END
+local function hello()
+  return os.date("%m/%d %I:%M", os.time())
+end
+require'lualine'.setup {
+  options = {
+    icons_enabled = true,
+    theme = 'auto',
+    component_separators = { left = '', right = ''},
+    section_separators = { left = '', right = ''},
+    disabled_filetypes = {},
+    always_divide_middle = true,
+  },
+  tabline = {
+    lualine_a = {'buffers'},
+    lualine_b = {'branch'},
+    lualine_c = {'filename'},
+    lualine_x = {},
+    lualine_y = {'tabs'},
+    lualine_z = {hello}
+  },
+  sections = {
+    lualine_a = {'mode'},
+    lualine_b = {
+        'branch',
+        'diff',
+        {'diagnostics', sources={'nvim_lsp', 'coc'}}},
+    lualine_c = {'filename'},
+    lualine_x = {'filetype'},
+    lualine_y = {'progress'},
+    lualine_z = {'location'}
+  },
+  inactive_sections = {
+    lualine_a = {},
+    lualine_b = {},
+    lualine_c = {'filename'},
+    lualine_x = {'location'},
+    lualine_y = {},
+    lualine_z = {}
+  },
+  extensions = {}
+}
+END
