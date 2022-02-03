@@ -11,6 +11,8 @@ set shell=zsh
 """ VUNDLE PLUGINS
 """"""""""""""""""""""
 
+let $FZF_DEFAULT_COMMAND = 'rg --files'
+
 call plug#begin('~/.vim/plugged')
 
 " utility
@@ -21,6 +23,7 @@ Plug 'scrooloose/nerdcommenter'
 " Plug 'neomake/neomake'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
+Plug 'stsewd/fzf-checkout.vim'
 " Plug 'yuki-yano/fzf-preview.vim'
 Plug 'mileszs/ack.vim'
 Plug 'jremmen/vim-ripgrep'
@@ -43,17 +46,20 @@ Plug 'ludovicchabant/vim-gutentags' " TODO figure out how to gen tags for site-p
 " VCS
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
+Plug 'kristijanhusak/vim-create-pr'
 
 " syntax
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" Plug 'kh3phr3n/python-syntax'
+Plug 'kh3phr3n/python-syntax'
 " Plug 'eagletmt/ghcmod-vim'
 " Plug 'Shougo/vimproc'
 " Plug 'rust-lang/rust.vim'
 " Plug 'leafgarland/typescript-vim'
 " Plug 'peitalin/vim-jsx-typescript'
 " Plug 'elixir-editors/vim-elixir'
-" Plug 'tweekmonster/django-plus.vim'
+Plug 'tweekmonster/django-plus.vim'
+Plug 'MaxMEllon/vim-jsx-pretty'
+Plug 'neovimhaskell/haskell-vim'
 
 " aesthetics
 " Plug 'morhetz/gruvbox'
@@ -140,6 +146,9 @@ colorscheme ayu
 " let g:gruvbox_termcolors = 256
 set termguicolors
 
+hi WarningMsg guifg=#c72a2a
+hi DiffDelete guibg=clear guifg=#c72a2a
+
 " backspace fix
 set backspace=2
 
@@ -150,9 +159,6 @@ set cursorline
 
 " highlight last inserted text
 nnoremap gV `[v`]
-
-" enable some mouse
-set mouse=n
 
 " line numbers
 set number
@@ -185,34 +191,6 @@ let g:far#default_file_mask = '/'
 let g:far#window_width = 120
 vnoremap <C-g> "hy:Far<SPACE><C-r>h<SPACE>
 
-" Ale
-let g:airline#extensions#ale#enabled = 1
-let g:ale_lint_on_enter = 1
-let g:ale_sign_column_always = 1
-let g:ale_sign_error = '✘'
-let g:ale_sign_warning = '◗'
-let g:ale_echo_msg_error_str = 'E'
-let g:ale_echo_msg_warning_str = 'W'
-let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
-let g:ale_linters = {
-\   'python': ['flake8'],
-\   'javascript': ['eslint'],
-\   'typescript': ['eslint'],
-\   'elixir': ['elixir-ls'],
-\}
-let g:ale_elixir_elixir_ls_release = expand("~/.elixir-ls/rel/")
-
-
-" Syntastic
-"set statusline+=%#warningmsg#
-"set statusline+=%{SyntasticStatuslineFlag()}
-"set statusline+=%*
-"let g:syntastic_always_populate_loc_list = 1
-"let g:syntastic_auto_loc_list = 0
-"let g:syntastic_check_on_open = 1
-"let g:syntastic_check_on_wq = 1
-"let g:syntastic_py_checkers = ['flake8']
-
 " FAR
 let g:far#source = 'agnvim'
 
@@ -237,7 +215,7 @@ let g:fzf_colors =
 
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 let g:fzf_preview_window = ['right:50%', 'ctrl-/']
-nnoremap ,f :FZF<CR>
+nnoremap ,f :Files<CR>
 " nnoremap ,ff :Buffers<CR>
 nnoremap ,l :Lines<CR>
 nnoremap ,t :Tags<CR>
@@ -275,8 +253,6 @@ let g:user_emmet_leader_key='<C-y>'
 let g:netrw_banner = 0
 let g:netrw_liststyle = 3
 
-let g:ped_edit_command = 'tabedit'
-
 " set statusline+=%{FugitiveStatusline()}
 set diffopt+=vertical
 
@@ -284,8 +260,6 @@ set diffopt+=vertical
 """ COMMANDS   
 """""""""""""""
 command! Vimrc tabe ~/.config/nvim/init.vim
-
-command! F FZF
 
 """"""""""""""""""
 """ KEYMAPPINGS
@@ -355,10 +329,10 @@ nnoremap N Nzz
 " fuck
 let g:wanker_mode=1
 if get(g:, 'wanker_mode')
-    nnoremap <silent> <Up>    :resize -2<CR>
-    nnoremap <silent> <Down>  :resize +2<CR>
-    nnoremap <silent> <Left>  :vertical resize -2<CR>
-    nnoremap <silent> <Right> :vertical resize +2<CR>
+    nnoremap <silent> <Up>    :resize +5<CR>
+    nnoremap <silent> <Down>  :resize -5<CR>
+    nnoremap <silent> <Left>  :vertical resize -5<CR>
+    nnoremap <silent> <Right> :vertical resize +5<CR>
 endif
 
 " giant steps
@@ -388,10 +362,6 @@ let g:wordmotion_mappings = {
 let g:NERDSpaceDelims = 1
 let g:NERDCustomDelimiters = { 'django': { 'left': '{#', 'right': '#}', 'leftAlt': '{% comment %}', 'rightAlt': '{% endcomment %}' } }
 
-" YCM
-let g:ycm_autoclose_preview_window_after_insertion = 1
-let g:ycm_autoclose_preview_window_after_completion = 1
-
 nnoremap ipdb Oimport ipdb; ipdb.set_trace()<ESC>
 
 " just do the obvious thing
@@ -400,6 +370,20 @@ command! Wq wq
 command! Q q
 command! Vs vs
 
+set previewheight=80
+nnoremap ga :Git add .<CR>
+nnoremap gs :Git<CR>
+nnoremap gw :Gwrite<CR>
+nnoremap gc :Git commit<CR>
+nnoremap gca :Git commit --amend<CR>
+nnoremap gcne :Git commit --amend --no-edit<CR>
+nnoremap gd :Git diff<CR>
+nnoremap gm :GMove 
+nnoremap gco :GBranches<CR>
+nnoremap grid :Git rebase -i develop<CR>
+nnoremap gpoh :Git push origin head<CR>
+nnoremap gpfoh :Git push --force origin head<CR>
+
 autocmd FileType qf setlocal wrap
 
 let g:UltiSnipsExpandTrigger="<c-s>"
@@ -407,8 +391,6 @@ let g:UltiSnipsListSnippets="<c-_>"
 let g:UltiSnipsJumpForwardTrigger="<c-j>"
 let g:UltiSnipsJumpBackwardTrigger="<c-k>"
 let g:UltiSnipsSnippetDirectories=["UltiSnips", $HOME."/.vim/snippets"] 
-nnoremap gd :Gdiffsplit<CR>
-nnoremap gm :GMove 
 
 let g:user_emmet_settings = {
 \  'html' : {
@@ -445,23 +427,29 @@ function! s:check_back_space() abort
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
+nmap <leader>rn <Plug>(coc-rename)
+
+" Add `:Format` command to format current buffer.
+command! -nargs=0 Format :call CocAction('format')
+
 " Use `[g` and `]g` to navigate diagnostics
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
+nmap <silent> [d <Plug>(coc-diagnostic-prev)
+nmap <silent> ]d <Plug>(coc-diagnostic-next)
 
 " GoTo code navigation.
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
+nmap <silent> <space>d <Plug>(coc-definition)
+nmap <silent> <space>y <Plug>(coc-type-definition)
+nmap <silent> <space>i <Plug>(coc-implementation)
+nmap <silent> <space>r <Plug>(coc-references)
 
 " nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
 nnoremap <space>a  :<C-u>CocList diagnostics<cr>
 
 " LuaLine config
+" TODO this complains when editing git commits etc.
 lua << END
-local function hello()
+local function clock()
   return os.date("%m/%d %I:%M", os.time())
 end
 require'lualine'.setup {
@@ -474,12 +462,12 @@ require'lualine'.setup {
     always_divide_middle = true,
   },
   tabline = {
-    lualine_a = {'buffers'},
-    lualine_b = {'branch'},
-    lualine_c = {'filename'},
+    lualine_a = {'filename'},
+    lualine_b = {},
+    lualine_c = {},
     lualine_x = {},
     lualine_y = {'tabs'},
-    lualine_z = {hello}
+    lualine_z = {clock}
   },
   sections = {
     lualine_a = {'mode'},
@@ -503,3 +491,15 @@ require'lualine'.setup {
   extensions = {}
 }
 END
+
+lua << END
+require'nvim-tree'.setup()
+END
+
+nnoremap <C-n> :NvimTreeToggle<CR>
+
+nnoremap <space>c :ccl<cr>
+nnoremap <space>q :wq<cr>
+nnoremap <space>w :w<cr>
+nnoremap <space>v :vs<cr>
+nnoremap <space>t :tabe<cr>
