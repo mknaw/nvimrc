@@ -50,6 +50,7 @@ Plug 'kristijanhusak/vim-create-pr'
 
 " syntax
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  TODO maybe, don't like the colors
 Plug 'kh3phr3n/python-syntax'
 " Plug 'eagletmt/ghcmod-vim'
 " Plug 'Shougo/vimproc'
@@ -174,7 +175,8 @@ au BufNewFile,BufRead *.tsx setlocal colorcolumn=80
 set laststatus=2
 
 let g:python_host_prog = '/usr/local/bin/python2'
-let g:python3_host_prog = '/usr/local/bin/python3'
+"let g:python3_host_prog = '/usr/local/bin/python3'
+let g:python3_host_prog = '~/.pyenv/versions/nvim/bin/python3'
 
 " code folding
 set foldmethod=indent
@@ -427,7 +429,7 @@ function! s:check_back_space() abort
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-nmap <leader>rn <Plug>(coc-rename)
+nmap <space>rn <Plug>(coc-rename)
 
 " Add `:Format` command to format current buffer.
 command! -nargs=0 Format :call CocAction('format')
@@ -503,3 +505,16 @@ nnoremap <space>q :wq<cr>
 nnoremap <space>w :w<cr>
 nnoremap <space>v :vs<cr>
 nnoremap <space>t :tabe<cr>
+
+"lua << END
+" require'nvim-treesitter.configs'.setup {
+  " -- Modules and its options go here
+  " highlight = { enable = true },
+  " incremental_selection = { enable = true },
+  " textobjects = { enable = true },
+" }
+" END
+
+
+hi CocHintSign guifg=#68959c
+nnoremap <space>th :CocCommand rust-analyzer.toggleInlayHints<CR>

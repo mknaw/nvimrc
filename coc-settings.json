@@ -1,0 +1,23 @@
+{
+  "coc.preferences.useQuickfixForLocations": true,
+
+  "diagnostic.checkCurrentLine": true,
+
+  "languageserver": {
+    "haskell": {
+      "command": "haskell-language-server-wrapper",
+      "args": ["--lsp"],
+      "rootPatterns": ["*.cabal", "stack.yaml", "cabal.project", "package.yaml", "hie.yaml"],
+      "filetypes": ["haskell", "lhaskell"]
+    }
+  },
+
+  "python.formatting.provider": "black",
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Path": "~/.pyenv/versions/nvim/bin/flake8",
+  "python.linting.flake8CategorySeverity.E": "Warning",
+  "pyright.enable": true
+
+}
+
