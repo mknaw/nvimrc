@@ -50,11 +50,10 @@ Plug 'kristijanhusak/vim-create-pr'
 
 " syntax
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  TODO maybe, don't like the colors
-Plug 'kh3phr3n/python-syntax'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+" Plug 'kh3phr3n/python-syntax'
 " Plug 'eagletmt/ghcmod-vim'
 " Plug 'Shougo/vimproc'
-" Plug 'rust-lang/rust.vim'
 " Plug 'leafgarland/typescript-vim'
 " Plug 'peitalin/vim-jsx-typescript'
 " Plug 'elixir-editors/vim-elixir'
@@ -127,17 +126,6 @@ botright cwindow
 
 " wrapping
 set wrap!
-
-" TODO pretty much never even use this
-nnoremap <space>1 :1tabn<CR>
-nnoremap <space>2 :2tabn<CR>
-nnoremap <space>3 :3tabn<CR>
-nnoremap <space>4 :4tabn<CR>
-nnoremap <space>5 :5tabn<CR>
-nnoremap <space>6 :6tabn<CR>
-nnoremap <space>7 :7tabn<CR>
-nnoremap <space>8 :8tabn<CR>
-nnoremap <space>9 :9tabn<CR>
 
 " theme
 colorscheme ayu
@@ -218,7 +206,7 @@ let g:fzf_colors =
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 let g:fzf_preview_window = ['right:50%', 'ctrl-/']
 nnoremap ,f :Files<CR>
-" nnoremap ,ff :Buffers<CR>
+nnoremap ,ff :Buffers<CR>
 nnoremap ,l :Lines<CR>
 nnoremap ,t :Tags<CR>
 
@@ -279,6 +267,7 @@ nnoremap yy y$
 
 " big cut
 nnoremap X VX
+nnoremap Y VY
 
 " delete without yank by default
 nnoremap d "_d
@@ -440,13 +429,30 @@ nmap <silent> [d <Plug>(coc-diagnostic-prev)
 nmap <silent> ]d <Plug>(coc-diagnostic-next)
 
 " GoTo code navigation.
-nmap <silent> <space>d <Plug>(coc-definition)
+nmap <silent> ,d <Plug>(coc-definition)
+nmap <silent> ,dv :call CocAction('jumpDefinition', 'vsplit')<CR>
+nmap <silent> ,ds :call CocAction('jumpDefinition', 'split')<CR>
+nmap <silent> ,dt :call CocAction('jumpDefinition', 'tabe')<CR>
 nmap <silent> <space>y <Plug>(coc-type-definition)
 nmap <silent> <space>i <Plug>(coc-implementation)
-nmap <silent> <space>r <Plug>(coc-references)
+nmap <silent> ,r <Plug>(coc-references)
+
+let g:coc_disable_transparent_cursor = 1
+
+command! OrganizeImports CocCommand pyright.organizeimports
 
 " nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
 nnoremap <space>a  :<C-u>CocList diagnostics<cr>
+
+nnoremap <silent> ,D :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    call feedkeys('K', 'in')
+  endif
+endfunction
 
 " LuaLine config
 " TODO this complains when editing git commits etc.
@@ -506,15 +512,23 @@ nnoremap <space>w :w<cr>
 nnoremap <space>v :vs<cr>
 nnoremap <space>t :tabe<cr>
 
-"lua << END
-" require'nvim-treesitter.configs'.setup {
-  " -- Modules and its options go here
-  " highlight = { enable = true },
-  " incremental_selection = { enable = true },
-  " textobjects = { enable = true },
-" }
-" END
-
-
 hi CocHintSign guifg=#68959c
 nnoremap <space>th :CocCommand rust-analyzer.toggleInlayHints<CR>
+
+lua << END
+require'nvim-treesitter.configs'.setup {
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
+  },
+  incremental_selection = { enable = true },
+  textobjects = { enable = true },
+}
+END
+
+" TBH for the most part I should probably just remap the link targets
+hi! link TSConstant Special
+hi! link TSParameter Constant
+hi! link TSType TSNone
+hi! link TSTypeBuiltin TSException
+hi Identifier guifg=foreground

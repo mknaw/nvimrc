@@ -1,6 +1,5 @@
 {
   "coc.preferences.useQuickfixForLocations": true,
-
   "diagnostic.checkCurrentLine": true,
 
   "languageserver": {
