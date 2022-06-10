@@ -42,6 +42,11 @@ Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'ludovicchabant/vim-gutentags' " TODO figure out how to gen tags for site-packages
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
+Plug 'MattesGroeger/vim-bookmarks'
+Plug 'tom-anders/telescope-vim-bookmarks.nvim'
+Plug 'AckslD/nvim-neoclip.lua'
 
 " VCS
 Plug 'tpope/vim-fugitive'
@@ -76,7 +81,7 @@ source ~/.config/nvim/plugin/argtextobj.vim
 """ CONFIG
 """"""""""""""
 
-let mapleader="\\"
+let mapleader=","
 
 let g:airline#extensions#clock#format = '%H:%M'
 
@@ -95,7 +100,7 @@ set tags=./tags,tags
 
 " tabs
 set autoindent
-set smartindent
+" set smartindent
 filetype indent on
 
 fu! SetTabs()
@@ -182,7 +187,7 @@ let g:far#window_width = 120
 vnoremap <C-g> "hy:Far<SPACE><C-r>h<SPACE>
 
 " FAR
-let g:far#source = 'agnvim'
+let g:far#source = 'rgnvim'
 
 " FZF
 set rtp+=/usr/local/opt/fzf
@@ -205,8 +210,35 @@ let g:fzf_colors =
 
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 let g:fzf_preview_window = ['right:50%', 'ctrl-/']
-nnoremap ,f :Files<CR>
-nnoremap ,ff :Buffers<CR>
+" nnoremap ,x :Files<CR>
+" nnoremap ,b :Buffers<CR>
+
+" Telescope
+nnoremap <leader>g <cmd>Telescope find_files<cr>
+nnoremap <leader>b <cmd>Telescope buffers<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+nnoremap <leader>fo <cmd>lua require('telescope.builtin').oldfiles()<cr>
+nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
+nnoremap <leader>fc <cmd>lua require('telescope.builtin').commands()<cr>
+nnoremap <leader>fs <cmd>lua require('telescope.builtin').search_history()<cr>
+nnoremap <leader>fq <cmd>lua require('telescope.builtin').quickfix()<cr>
+nnoremap <leader>fr <cmd>lua require('telescope.builtin').registers()<cr>
+nnoremap <leader>fz <cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>
+nnoremap <leader>fm <cmd>lua require('telescope').extensions.vim_bookmarks.all()<cr>
+lua << EOF
+require('telescope').load_extension('vim_bookmarks')
+require('telescope').setup{
+  defaults = {
+      mappings = {
+        i = {
+          ["<C-j>"] = require('telescope.actions').move_selection_next,
+          ["<C-k>"] = require('telescope.actions').move_selection_previous,
+        },
+      },
+  },
+}
+EOF
+
 nnoremap ,l :Lines<CR>
 nnoremap ,t :Tags<CR>
 
@@ -283,9 +315,6 @@ nnoremap yr y$h
 nnoremap vr v$h
 
 " copy to clipboard in general
-" TODO have to fix this so it copies to clipboard -and- to register.
-nnoremap y "*y
-vnoremap y "*y
 vnoremap <C-C> "*y
 
 " visual search + replace
@@ -381,7 +410,7 @@ let g:UltiSnipsExpandTrigger="<c-s>"
 let g:UltiSnipsListSnippets="<c-_>"
 let g:UltiSnipsJumpForwardTrigger="<c-j>"
 let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-let g:UltiSnipsSnippetDirectories=["UltiSnips", $HOME."/.vim/snippets"] 
+let g:UltiSnipsSnippetDirectories=[$HOME."/.vim/snippets", $HOME."/.vim/plugged/vim_snippets/snippets"] 
 
 let g:user_emmet_settings = {
 \  'html' : {
@@ -435,7 +464,7 @@ nmap <silent> ,ds :call CocAction('jumpDefinition', 'split')<CR>
 nmap <silent> ,dt :call CocAction('jumpDefinition', 'tabe')<CR>
 nmap <silent> <space>y <Plug>(coc-type-definition)
 nmap <silent> <space>i <Plug>(coc-implementation)
-nmap <silent> ,r <Plug>(coc-references)
+nmap <silent> <space>r <Plug>(coc-references)
 
 let g:coc_disable_transparent_cursor = 1
 
@@ -529,6 +558,15 @@ END
 " TBH for the most part I should probably just remap the link targets
 hi! link TSConstant Special
 hi! link TSParameter Constant
-hi! link TSType TSNone
+" TODO would love different for declaration vs reference.
+hi! link TSType Special
 hi! link TSTypeBuiltin TSException
 hi Identifier guifg=foreground
+
+set nofoldenable
+
+command! -nargs=0 Prettier :CocCommand prettier.forceFormatDocument
+
+let g:bookmark_no_default_key_mappings = 1
+nmap mm <Plug>BookmarkToggle
+nmap mx <Plug>BookmarkClearAll

@@ -12,11 +12,15 @@
   },
 
   "python.formatting.provider": "black",
+  "python.formatting.blackPath": "~/.pyenv/shims/black",
   "python.linting.enabled": true,
   "python.linting.flake8Enabled": true,
   "python.linting.flake8Path": "~/.pyenv/versions/nvim/bin/flake8",
   "python.linting.flake8CategorySeverity.E": "Warning",
-  "pyright.enable": true
+  "pyright.enable": true,
 
+  "prettier.tabWidth": 4,
+  "prettier.singleQuote": true,
+  "prettier.arrowParens": "avoid"
 }
 
