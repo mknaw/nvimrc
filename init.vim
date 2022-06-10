@@ -11,8 +11,6 @@ set shell=zsh
 """ VUNDLE PLUGINS
 """"""""""""""""""""""
 
-let $FZF_DEFAULT_COMMAND = 'rg --files'
-
 call plug#begin('~/.vim/plugged')
 
 " utility
@@ -21,10 +19,6 @@ Plug 'kyazdani42/nvim-web-devicons'
 Plug 'brooth/far.vim'
 Plug 'scrooloose/nerdcommenter'
 " Plug 'neomake/neomake'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
-Plug 'stsewd/fzf-checkout.vim'
-" Plug 'yuki-yano/fzf-preview.vim'
 Plug 'mileszs/ack.vim'
 Plug 'jremmen/vim-ripgrep'
 " Plug 'Shougo/neocomplete.vim'
@@ -189,30 +183,6 @@ vnoremap <C-g> "hy:Far<SPACE><C-r>h<SPACE>
 " FAR
 let g:far#source = 'rgnvim'
 
-" FZF
-set rtp+=/usr/local/opt/fzf
-
-" Default fzf layout
-let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.8 } }
-let g:fzf_colors =
-\ { 'fg':      ['fg', 'Normal'],
-  \ 'bg':      ['bg', 'Normal'],
-  \ 'hl':      ['fg', 'Comment'],
-  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-  \ 'hl+':     ['fg', 'Statement'],
-  \ 'info':    ['fg', 'PreProc'],
-  \ 'prompt':  ['fg', 'Conditional'],
-  \ 'pointer': ['fg', 'Conditional'],
-  \ 'marker':  ['fg', 'Keyword'],
-  \ 'spinner': ['fg', 'Label'],
-  \ 'header':  ['fg', 'Comment'] }
-
-let g:fzf_history_dir = '~/.local/share/fzf-history'
-let g:fzf_preview_window = ['right:50%', 'ctrl-/']
-" nnoremap ,x :Files<CR>
-" nnoremap ,b :Buffers<CR>
-
 " Telescope
 nnoremap <leader>g <cmd>Telescope find_files<cr>
 nnoremap <leader>b <cmd>Telescope buffers<cr>
@@ -247,22 +217,6 @@ function! s:build_quickfix_list(lines)
   copen
   cc
 endfunction
-
-let g:fzf_action = {
-  \ 'ctrl-q': function('s:build_quickfix_list'),
-  \ 'ctrl-t': 'tab split',
-  \ 'ctrl-x': 'split',
-  \ 'ctrl-v': 'vsplit' }
-
-" TODO would be good to read the `g:fzf_preview_window` var instead of
-"      repeating here.
-command! -bang -nargs=* LinesWithPreview
-    \ call fzf#vim#grep(
-    \   'rg --with-filename --column --line-number --no-heading --color=always --smart-case . '.fnameescape(expand('%')), 1,
-    \   fzf#vim#with_preview({
-    \       'options': '--delimiter : --no-sort'}),
-    \   0)
-nnoremap H :LinesWithPreview<CR>
 
 " quickr preview on cursor
 " let g:quickr_preview_on_cursor = 1
