@@ -59,6 +59,7 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'tweekmonster/django-plus.vim'
 Plug 'MaxMEllon/vim-jsx-pretty'
 Plug 'neovimhaskell/haskell-vim'
+Plug 'psiska/telescope-hoogle.nvim'
 
 " aesthetics
 " Plug 'morhetz/gruvbox'
@@ -186,6 +187,7 @@ let g:far#source = 'rgnvim'
 " Telescope
 nnoremap <leader>g <cmd>Telescope find_files<cr>
 nnoremap <leader>b <cmd>Telescope buffers<cr>
+nnoremap <leader>t <cmd>lua require('telescope.builtin').tags()<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fo <cmd>lua require('telescope.builtin').oldfiles()<cr>
 nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
@@ -195,8 +197,9 @@ nnoremap <leader>fq <cmd>lua require('telescope.builtin').quickfix()<cr>
 nnoremap <leader>fr <cmd>lua require('telescope.builtin').registers()<cr>
 nnoremap <leader>fz <cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>
 nnoremap <leader>fm <cmd>lua require('telescope').extensions.vim_bookmarks.all()<cr>
+nnoremap <leader>fy <cmd>lua require('telescope').extensions.neoclip.default()<cr>
+
 lua << EOF
-require('telescope').load_extension('vim_bookmarks')
 require('telescope').setup{
   defaults = {
       mappings = {
@@ -207,10 +210,21 @@ require('telescope').setup{
       },
   },
 }
-EOF
 
-nnoremap ,l :Lines<CR>
-nnoremap ,t :Tags<CR>
+-- Extensions
+require('telescope').load_extension('vim_bookmarks')
+require('telescope').load_extension('hoogle')
+
+require('neoclip').setup({
+  keys = {
+    telescope = {
+      i = {
+        paste_behind = '<c-o>',
+      },
+    },
+  },
+})
+EOF
 
 function! s:build_quickfix_list(lines)
   call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
@@ -436,6 +450,9 @@ function! s:show_documentation()
     call feedkeys('K', 'in')
   endif
 endfunction
+
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a v<Plug>(coc-codeaction-selected)
 
 " LuaLine config
 " TODO this complains when editing git commits etc.
