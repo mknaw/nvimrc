@@ -1,26 +1,62 @@
 {
   "coc.preferences.useQuickfixForLocations": true,
   "diagnostic.checkCurrentLine": true,
+  "codeLens.enable": false,
+  "suggest.noselect": true,
 
   "languageserver": {
+    "ruff-lsp": {
+      "command": "~/.pyenv/versions/nvim/bin/ruff-lsp",
+      "filetypes": ["python"]
+    },
+
     "haskell": {
       "command": "haskell-language-server-wrapper",
       "args": ["--lsp"],
       "rootPatterns": ["*.cabal", "stack.yaml", "cabal.project", "package.yaml", "hie.yaml"],
-      "filetypes": ["haskell", "lhaskell"]
+      "filetypes": ["haskell", "lhaskell"],
+      "initializationOptions": {
+          "languageServerHaskell": {
+              "hlintOn": true
+          }
+      }
+    },
+
+    "ccls": {
+      "command": "ccls",
+      "filetypes": ["c", "cc", "cpp", "c++", "objc", "objcpp"],
+      "rootPatterns": [".ccls", "compile_commands.json", ".git/", ".hg/"],
+      "initializationOptions": {
+        "cache": {
+          "directory": "/tmp/ccls"
+        },
+        "clang": {
+          "extraArgs": [
+             "-isystem",
+             "/usr/local/opt/llvm/include/c++/v1"
+          ],
+          "resourceDir": "/usr/local/opt/llvm/lib/clang/9.0.1"
+        }
+      }
     }
   },
 
+  "inlayHint.enable": true,
+  "rust-analyzer.inlayHints.typeHints.enable": true,
+  "rust-analyzer.inlayHints.chainingHints.enable": true,
+  "rust-analyzer.checkOnSave.command_": "clippy",
+
   "python.formatting.provider": "black",
   "python.formatting.blackPath": "~/.pyenv/shims/black",
-  "python.linting.enabled": true,
-  "python.linting.flake8Enabled": true,
-  "python.linting.flake8Path": "~/.pyenv/versions/nvim/bin/flake8",
-  "python.linting.flake8CategorySeverity.E": "Warning",
+  "python.formatting.blackArgs": "-S",
+  "python.linting.enabled": false,
+  "python.linting.flake8Enabled": false,
   "pyright.enable": true,
 
   "prettier.tabWidth": 4,
   "prettier.singleQuote": true,
-  "prettier.arrowParens": "avoid"
+  "prettier.arrowParens": "avoid",
+  
+  "salesforcedx-vscode-apex.java.home": "/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home"
 }
 

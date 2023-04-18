@@ -41,6 +41,11 @@ Plug 'nvim-telescope/telescope.nvim'
 Plug 'MattesGroeger/vim-bookmarks'
 Plug 'tom-anders/telescope-vim-bookmarks.nvim'
 Plug 'AckslD/nvim-neoclip.lua'
+Plug 'mbbill/undotree'
+Plug 'jeetsukumaran/vim-indentwise'
+Plug 'github/copilot.vim'
+Plug 'andythigpen/nvim-coverage'
+Plug 'ThePrimeagen/refactoring.nvim'
 
 " VCS
 Plug 'tpope/vim-fugitive'
@@ -113,6 +118,8 @@ endfunction
 call SetTabs()
 nmap <C-t> :silent call SetTabs()<CR>
 
+autocmd FileType haskell setlocal shiftwidth=2 softtabstop=2 expandtab
+
 set splitright
 set splitbelow
 
@@ -158,6 +165,7 @@ au BufNewFile,BufRead *.py setlocal colorcolumn=120
 au BufNewFile,BufRead *.js setlocal colorcolumn=80
 au BufNewFile,BufRead *.ts setlocal colorcolumn=80
 au BufNewFile,BufRead *.tsx setlocal colorcolumn=80
+au BufNewFile,BufRead *.rs setlocal colorcolumn=100
 
 " always display the status line
 set laststatus=2
@@ -165,6 +173,8 @@ set laststatus=2
 let g:python_host_prog = '/usr/local/bin/python2'
 "let g:python3_host_prog = '/usr/local/bin/python3'
 let g:python3_host_prog = '~/.pyenv/versions/nvim/bin/python3'
+let g:node_host_prog = '/usr/local/opt/node/bin/node'
+let g:copilot_node_command = '/usr/local/opt/node/bin/node'
 
 " code folding
 set foldmethod=indent
@@ -175,6 +185,7 @@ augroup OpenAllFoldsOnFileOpen
 augroup END
 
 nnoremap \ :Rg<SPACE>
+nnoremap <leader>fw :Rg <cword><CR>
 
 let g:far#source = 'rg'
 let g:far#default_file_mask = '/'
@@ -186,6 +197,7 @@ let g:far#source = 'rgnvim'
 
 " Telescope
 nnoremap <leader>g <cmd>Telescope find_files<cr>
+nnoremap <leader>sp <cmd>Telescope find_files cwd=~/sp/<cr>
 nnoremap <leader>b <cmd>Telescope buffers<cr>
 nnoremap <leader>t <cmd>lua require('telescope.builtin').tags()<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
@@ -198,6 +210,7 @@ nnoremap <leader>fr <cmd>lua require('telescope.builtin').registers()<cr>
 nnoremap <leader>fz <cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>
 nnoremap <leader>fm <cmd>lua require('telescope').extensions.vim_bookmarks.all()<cr>
 nnoremap <leader>fy <cmd>lua require('telescope').extensions.neoclip.default()<cr>
+nnoremap <leader>hg <cmd>lua require('telescope').extensions.hoogle.list()<cr>
 
 lua << EOF
 require('telescope').setup{
@@ -208,6 +221,19 @@ require('telescope').setup{
           ["<C-k>"] = require('telescope.actions').move_selection_previous,
         },
       },
+  },
+  extensions = {
+    hoogle = {
+      render = 'default',       -- Select the preview render engine: default|treesitter
+                                -- default = simple approach to render the document
+                                -- treesitter = render the document by utilizing treesitter's html parser
+      renders = {               -- Render specific options
+        treesitter = {
+          remove_wrap = false   -- Remove hoogle's own text wrapping. E.g. if you uses neovim's buffer wrapping
+                                -- (autocmd User TelescopePreviewerLoaded setlocal wrap)
+        }
+      }
+    }
   },
 }
 
@@ -254,6 +280,9 @@ command! Vimrc tabe ~/.config/nvim/init.vim
 """"""""""""""""""
 """ KEYMAPPINGS
 """"""""""""""""""
+
+" last buffer remap
+nnoremap <silent> <space>b <c-^>
 
 nnoremap <silent> ,<space> :noh<CR>
 nnoremap <silent> <space>, :syntax sync fromstart<CR>
@@ -351,6 +380,7 @@ let g:NERDSpaceDelims = 1
 let g:NERDCustomDelimiters = { 'django': { 'left': '{#', 'right': '#}', 'leftAlt': '{% comment %}', 'rightAlt': '{% endcomment %}' } }
 
 nnoremap ipdb Oimport ipdb; ipdb.set_trace()<ESC>
+nnoremap rdb Ofrom celery.contrib import rdb; rdb.set_trace()<ESC>
 
 " just do the obvious thing
 command! W w
@@ -451,8 +481,9 @@ function! s:show_documentation()
   endif
 endfunction
 
-xmap <leader>a  <Plug>(coc-codeaction-selected)
-nmap <leader>a v<Plug>(coc-codeaction-selected)
+xmap <leader>a  <Plug>(coc-codeaction)
+vnoremap <leader>a <Plug>(coc-codeaction-selected)<C-C>
+" nmap <leader>a v<Plug>(coc-codeaction-selected)
 
 " LuaLine config
 " TODO this complains when editing git commits etc.
@@ -507,20 +538,27 @@ END
 nnoremap <C-n> :NvimTreeToggle<CR>
 
 nnoremap <space>c :ccl<cr>
-nnoremap <space>q :wq<cr>
+nnoremap <space>q :wq!<cr>
+nnoremap <space>e :e!<cr>
+nnoremap <space>qq :q!<cr>
 nnoremap <space>w :w<cr>
 nnoremap <space>v :vs<cr>
+nnoremap <space>s :sp<cr>
 nnoremap <space>t :tabe<cr>
+nnoremap <space>i :silent execute('!isort -q --dont-order-by-type ' . expand("%:p"))<cr>
+nnoremap <space>f :Format<cr>
 
 hi CocHintSign guifg=#68959c
-nnoremap <space>th :CocCommand rust-analyzer.toggleInlayHints<CR>
+nnoremap <space>th :CocCommand document.toggleInlayHint<CR>
 
 lua << END
 require'nvim-treesitter.configs'.setup {
   highlight = {
     enable = true,
+    disable = { "vim" },
     additional_vim_regex_highlighting = false,
   },
+
   incremental_selection = { enable = true },
   textobjects = { enable = true },
 }
@@ -530,8 +568,8 @@ END
 hi! link TSConstant Special
 hi! link TSParameter Constant
 " TODO would love different for declaration vs reference.
-hi! link TSType Special
-hi! link TSTypeBuiltin TSException
+hi! link Type Special
+" hi! link TSTypeBuiltin TSException
 hi Identifier guifg=foreground
 
 set nofoldenable
@@ -541,3 +579,80 @@ command! -nargs=0 Prettier :CocCommand prettier.forceFormatDocument
 let g:bookmark_no_default_key_mappings = 1
 nmap mm <Plug>BookmarkToggle
 nmap mx <Plug>BookmarkClearAll
+
+inoremap <silent><expr> <CR> pumvisible() ? coc#_select_confirm()
+      \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+au FileType qf wincmd J
+
+nnoremap <space>p :Copilot panel<cr>
+inoremap <C-j> <Plug>(copilot-dismiss)
+inoremap <C-]> <Plug>(copilot-next)
+inoremap <C-[> <Plug>(copilot-previous)
+imap <silent><script><expr> <C-_> copilot#Accept("\<CR>")
+let g:copilot_no_tab_map = v:true
+
+let g:org_agenda_files=['~/org/index.org']
+
+au BufRead,BufNewFile *.cls                set filetype=apex
+au BufRead,BufNewFile *.trigger            set filetype=apex
+au BufRead,BufNewFile *.cmp                set filetype=xml
+
+
+lua << EOF
+local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+parser_config.apex = {
+  install_info = {
+    url = "~/dev/tree-sitter-sfapex/apex/",
+    files = {"src/parser.c"},
+  },
+  filetype = "apex",
+  highlight = {
+    enable = true,
+  },
+}
+EOF
+
+lua << EOF
+require("coverage").setup({
+  commands = true, -- create commands
+  signs = {
+    -- use your own highlight groups or text markers
+    covered = { hl = "CoverageCovered", text = "▎" },
+    uncovered = { hl = "CoverageUncovered", text = "▎" },
+  },
+  summary = {
+    -- customize the summary pop-up
+    min_coverage = 80.0,      -- minimum coverage threshold (used for highlighting)
+  },
+})
+EOF
+
+inoremap <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+" use <tab> to trigger completion and navigate to the next complete item
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+inoremap <silent><expr> <Tab>
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
+      \ coc#refresh()
+inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+inoremap <expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+
+lua << EOF
+  -- load refactoring Telescope extension
+  require("telescope").load_extension("refactoring")
+
+  -- remap to open the Telescope refactoring menu in visual mode
+  vim.api.nvim_set_keymap(
+          "v",
+          "<leader>rr",
+          "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
+          { noremap = true }
+  )
+EOF
+
+nnoremap <space>u :UndotreeToggle<CR>
