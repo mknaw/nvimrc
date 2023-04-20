@@ -1,16 +1,12 @@
-vim.opt.runtimepath:append(',~/.config/nvim')
+local set = vim.opt
+
+set.runtimepath:append(',~/.config/nvim')
 
 vim.g.mapleader = ','
 
 require('plugins')
 require('aesthetics')
-require('treesitter-cfg')
-
-require('coc-cfg')
-
-require('telescope-cfg')
-require('lualine-cfg')
-
+require('tabwidth')
 
 vim.g.python_host_prog = '/usr/local/bin/python2'
 vim.g.python3_host_prog = '~/.pyenv/versions/nvim/bin/python3'
@@ -19,20 +15,24 @@ vim.g.copilot_node_command = '/usr/local/opt/node/bin/node'
 
 vim.cmd([[ command! Vimrc tabe ~/.config/nvim/init.lua ]])
 
-vim.opt.shell = 'zsh'
+set.shell = 'zsh'
 
-vim.opt.autoindent = true
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-vim.opt.showmatch = true
-vim.opt.autoread = true
+set.syntax = 'off'  -- trees sat
+set.autoindent = true
+set.splitright = true
+set.splitbelow = true
+set.showmatch = true
+set.autoread = true
+
+set.wrap = false
+set.expandtab = true
 
 -- always display the status line
-vim.opt.laststatus = 2
+set.laststatus = 2
 
-vim.opt.previewheight = 80
+set.previewheight = 80
 
-vim.opt.colorcolumn = '110'
+set.colorcolumn = '110'
 -- TODO could move this to some sort of per-lang config
 vim.cmd([[
 au BufNewFile,BufRead *.py setlocal colorcolumn=120
@@ -50,7 +50,6 @@ vim.cmd([[
 nnoremap <silent> <space>b <c-^>
 
 nnoremap <silent> ,<space> :noh<CR>
-nnoremap <silent> <space>, :syntax sync fromstart<CR>
 
 inoremap jj <ESC>
 
@@ -150,13 +149,14 @@ nnoremap <space>w :w<cr>
 nnoremap <space>v :vs<cr>
 nnoremap <space>s :sp<cr>
 nnoremap <space>t :tabe<cr>
-nnoremap <space>i :silent execute('!isort -q --dont-order-by-type ' . expand("%:p"))<cr>
 nnoremap <space>f :Format<cr>
 ]])
 
+-- TODO python only
 vim.cmd([[
 nnoremap ipdb Oimport ipdb; ipdb.set_trace()<ESC>
 nnoremap rdb Ofrom celery.contrib import rdb; rdb.set_trace()<ESC>
+nnoremap <space>i :silent execute('!isort -q --dont-order-by-type ' . expand("%:p"))<cr>
 ]])
 
 vim.cmd([[
@@ -183,12 +183,5 @@ nnoremap gpoh :Git push origin head<CR>
 nnoremap gpfoh :Git push --force origin head<CR>
 ]])
 
-require('neoclip').setup({
-  keys = {
-    telescope = {
-      i = {
-        paste_behind = '<c-o>',
-      },
-    },
-  },
-})
+vim.g.netrw_banner = 0
+vim.g.netrw_liststyle = 3

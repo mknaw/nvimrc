@@ -1,4 +1,8 @@
+vim.opt.runtimepath:append("~/.config/tree-sitter/parsers")
+
 require'nvim-treesitter.configs'.setup {
+  parser_install_dir = "~/.config/tree-sitter/parsers",
+
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = false,
@@ -6,9 +10,7 @@ require'nvim-treesitter.configs'.setup {
 
   incremental_selection = { enable = true },
   textobjects = { enable = true },
-}
 
-require "nvim-treesitter.configs".setup {
   playground = {
     enable = true,
     disable = {},

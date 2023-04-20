@@ -8,25 +8,13 @@ require('telescope').setup{
         },
       },
   },
-  extensions = {
-    hoogle = {
-      render = 'default',       -- Select the preview render engine: default|treesitter
-                                -- default = simple approach to render the document
-                                -- treesitter = render the document by utilizing treesitter's html parser
-      renders = {               -- Render specific options
-        treesitter = {
-          remove_wrap = false   -- Remove hoogle's own text wrapping. E.g. if you uses neovim's buffer wrapping
-                                -- (autocmd User TelescopePreviewerLoaded setlocal wrap)
-        }
-      }
-    }
-  },
 }
 
 vim.cmd([[
 " Telescope
 nnoremap <leader>g <cmd>Telescope find_files<cr>
 nnoremap <leader>sp <cmd>Telescope find_files cwd=~/sp/<cr>
+nnoremap <leader>cf <cmd>Telescope find_files cwd=~/.config/nvim/<cr>
 nnoremap <leader>b <cmd>Telescope buffers<cr>
 nnoremap <leader>t <cmd>lua require('telescope.builtin').tags()<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
@@ -41,16 +29,3 @@ nnoremap <leader>fm <cmd>lua require('telescope').extensions.vim_bookmarks.all()
 nnoremap <leader>fy <cmd>lua require('telescope').extensions.neoclip.default()<cr>
 nnoremap <leader>hg <cmd>lua require('telescope').extensions.hoogle.list()<cr>
 ]])
-
--- Extensions
-require('telescope').load_extension('vim_bookmarks')
-require('telescope').load_extension('hoogle')
-
-require("telescope").load_extension("refactoring")
--- remap to open the Telescope refactoring menu in visual mode
-vim.api.nvim_set_keymap(
-  "v",
-  "<leader>rr",
-  "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
-  { noremap = true }
-)
