@@ -42,87 +42,58 @@ au BufNewFile,BufRead *.tsx setlocal colorcolumn=80
 au BufNewFile,BufRead *.rs setlocal colorcolumn=100
 ]])
 
+vim.keymap.set('i', 'jj', '<ESC>', {})
 
--- TODO move to a keymaps.lua file?
+-- clear highlights
+vim.keymap.set('n', ',<space>', ':noh<CR>', { silent = true })
+
+-- last buffer remap
+vim.keymap.set('n', '<space>b', '<c-^>', { silent = true })
+
+-- eol yank without newline
+vim.keymap.set('n', 'yy', 'y$', {})
+
+-- big steps
+vim.keymap.set({ 'n', 'v' }, 'J', '10j', {})
+vim.keymap.set({ 'n', 'v' }, 'K', '10k', {})
+
+-- big cut
+vim.keymap.set('n', 'X', 'VX', {})
+vim.keymap.set('n', 'Y', 'VY', {})
+
+vim.keymap.set('v', '$', '$h', {})
+
+-- avoid exit
+vim.keymap.set('n', 'ZZ', 'zz', {})
+-- margin at top after jump
+vim.keymap.set('n', 'zt', 'zt3k3j', {})
+
+-- merge lines with L
+vim.keymap.set('n', 'L', 'J', {})
+
+-- delete without yank by default
+vim.keymap.set({ 'n', 'v' }, 'd', '"_d', {})
+vim.keymap.set({ 'n', 'v' }, 'c', '"_c', {})
+vim.keymap.set('n', 'x', '"_x', {})
+
+-- copy to clipboard in general
+vim.keymap.set('v', '<C-C>', '"*y', {})
+-- visual search + replace
+vim.keymap.set('v', '<C-r>', '"hy:%s/<C-r>h//gc<left><left><left>', {})
+
+vim.keymap.set('n', '<Up>', ':resize +5<CR>', { silent = true })
+vim.keymap.set('n', '<Down>', ':resize -5<CR>', { silent = true })
+vim.keymap.set('n', '<Left>', ':vertical resize -5<CR>', { silent = true })
+vim.keymap.set('n', '<Right>', ':vertical resize +5<CR>', { silent = true })
+
+vim.keymap.set('n', '<C-H><C-H>', 'gT', {})
+vim.keymap.set('n', '<C-L><C-L>', 'gt', {})
+vim.keymap.set('n', '<C-J>', '<C-W><C-J>', {})
+vim.keymap.set('n', '<C-K>', '<C-W><C-K>', {})
+vim.keymap.set('n', '<C-L>', '<C-W><C-L>', {})
+vim.keymap.set('n', '<C-H>', '<C-W><C-H>', {})
 
 vim.cmd([[
-" last buffer remap
-nnoremap <silent> <space>b <c-^>
-
-nnoremap <silent> ,<space> :noh<CR>
-
-inoremap jj <ESC>
-
-vnoremap $ $h
-
-" eol yank without newline
-nnoremap yy y$
-
-" big cut
-nnoremap X VX
-nnoremap Y VY
-
-" delete without yank by default
-nnoremap d "_d
-vnoremap d "_d
-nnoremap c "_c
-vnoremap c "_c
-nnoremap x "_x
-
-" rest of line shortkeys
-nnoremap dr "_d$h
-nnoremap cr c$h
-nnoremap yr y$h
-nnoremap vr v$h
-
-" copy to clipboard in general
-vnoremap <C-C> "*y
-
-" visual search + replace
-vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>
-
-" splits
-" move more sensibly
-
-" avoid exit
-nnoremap ZZ zz
-
-" margin at top after jump
-nnoremap zt zt3k3j
-
-" center after next match
-nnoremap n nzz
-nnoremap N Nzz
-
-
-" nav
-nnoremap J 10j
-vnoremap J 10j
-nnoremap K 10k
-vnoremap K 10k
-nnoremap <silent> <Up>    :resize +5<CR>
-nnoremap <silent> <Down>  :resize -5<CR>
-nnoremap <silent> <Left>  :vertical resize -5<CR>
-nnoremap <silent> <Right> :vertical resize +5<CR>
-nnoremap <C-H><C-H> gT
-nnoremap <C-L><C-L> gt
-nnoremap <C-J> <C-W><C-J>
-nnoremap <C-K> <C-W><C-K>
-nnoremap <C-L> <C-W><C-L>
-nnoremap <C-H> <C-W><C-H>
-" resize panels ... TODO I dont really use these
-nnoremap <silent> <space>j :exe "resize " . (&lines * 3/2)<CR>
-nnoremap <silent> <space>k :exe "resize " . (&lines * 2/3)<CR>
-nnoremap <silent> <space>h :exe "vertical resize " . (&columns * 3/2)<CR>
-nnoremap <silent> <space>l :exe "vertical resize " . (&columns * 2/3)<CR>
-
-" bol / eol shortkeys
-map <C-o> ^
-map <C-p> $
-
-" merge lines with L
-nnoremap L J
-
 " wordmotion
 let g:wordmotion_mappings = {
 \ 'w' : ',w',
@@ -135,22 +106,15 @@ let g:wordmotion_mappings = {
 
 ]])
 
-vim.cmd([[
-nnoremap \ :Rg<SPACE>
-nnoremap <leader>fw :Rg <cword><CR>
-]])
-
-vim.cmd([[
-nnoremap <space>c :ccl<cr>
-nnoremap <space>q :wq!<cr>
-nnoremap <space>e :e!<cr>
-nnoremap <space>qq :q!<cr>
-nnoremap <space>w :w<cr>
-nnoremap <space>v :vs<cr>
-nnoremap <space>s :sp<cr>
-nnoremap <space>t :tabe<cr>
-nnoremap <space>f :Format<cr>
-]])
+vim.keymap.set('n', '<space>c', ':ccl<cr>', {})
+vim.keymap.set('n', '<space>q', ':wq!<cr>', {})
+vim.keymap.set('n', '<space>e', ':e!<cr>', {})
+vim.keymap.set('n', '<space>qq', ':q!<cr>', {})
+vim.keymap.set('n', '<space>w', ':w<cr>', {})
+vim.keymap.set('n', '<space>v', ':vs<cr>', {})
+vim.keymap.set('n', '<space>s', ':sp<cr>', {})
+vim.keymap.set('n', '<space>t', ':tabe<cr>', {})
+vim.keymap.set('n', '<space>f', ':Format<cr>', {})
 
 -- TODO python only
 vim.cmd([[
@@ -165,22 +129,6 @@ command! W w
 command! Wq wq
 command! Q q
 command! Vs vs
-]])
-
-
-vim.cmd([[
-nnoremap ga :Git add .<CR>
-nnoremap gs :Git<CR>
-nnoremap gw :Gwrite<CR>
-nnoremap gc :Git commit<CR>
-nnoremap gca :Git commit --amend<CR>
-nnoremap gcne :Git commit --amend --no-edit<CR>
-nnoremap gd :Git diff<CR>
-nnoremap gm :GMove 
-nnoremap gco :GBranches<CR>
-nnoremap grid :Git rebase -i develop<CR>
-nnoremap gpoh :Git push origin head<CR>
-nnoremap gpfoh :Git push --force origin head<CR>
 ]])
 
 vim.g.netrw_banner = 0

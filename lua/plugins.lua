@@ -22,7 +22,13 @@ require('packer').startup(function(use)
       keys = { '<leader>cc', '<leader>cu' },
       cmd = { 'NERDCommenterToggle', 'NERDCommenter' },
   }
-  use { 'jremmen/vim-ripgrep', opt = true, cmd = { 'Rg' } }
+  use {
+    'jremmen/vim-ripgrep',
+    config = function()
+      vim.keymap.set('n', '\\', ':Rg<SPACE>', {})
+      vim.keymap.set('n', '<leader>fw', ':Rg <cword><CR>', {})
+    end
+  }
   use 'jiangmiao/auto-pairs'
   use { 'chrisbra/csv.vim', ft = { 'csv' } }
   use 'kana/vim-textobj-user'
@@ -60,14 +66,42 @@ require('packer').startup(function(use)
   use 'nvim-lua/plenary.nvim'
   use {
     'nvim-telescope/telescope.nvim',
-    config = function() require('telescope-cfg') end,
+    config = function()
+      require('telescope').setup{
+        defaults = {
+            mappings = {
+              i = {
+                ["<C-j>"] = require('telescope.actions').move_selection_next,
+                ["<C-k>"] = require('telescope.actions').move_selection_previous,
+              },
+            },
+        },
+      }
+
+      vim.keymap.set('n', '<leader>g', '<cmd>Telescope find_files<cr>', {})
+      vim.keymap.set('n', '<leader>sp', '<cmd>Telescope find_files cwd=~/sp/<cr>', {})
+      vim.keymap.set('n', '<leader>cf', '<cmd>Telescope find_files cwd=~/.config/nvim/<cr>', {})
+      vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers', {})
+      vim.keymap.set('n', '<leader>t', "<cmd>lua require('telescope.builtin').tags()<cr>", {})
+      vim.keymap.set('n', '<leader>fg', '<cmd>Telescope live_grep<cr>', {})
+      vim.keymap.set('n', '<leader>fo', "<cmd>lua require('telescope.builtin').oldfiles()<cr>", {})
+      vim.keymap.set('n', '<leader>fh', "<cmd>lua require('telescope.builtin').help_tags()<cr>", {})
+      vim.keymap.set('n', '<leader>fc', "<cmd>lua require('telescope.builtin').commands()<cr>", {})
+      vim.keymap.set('n', '<leader>fs', "<cmd>lua require('telescope.builtin').search_history()<cr>", {})
+      vim.keymap.set('n', '<leader>fq', "<cmd>lua require('telescope.builtin').quickfix()<cr>", {})
+      vim.keymap.set('n', '<leader>fr', "<cmd>lua require('telescope.builtin').registers()<cr>", {})
+      vim.keymap.set('n', '<leader>fz', "<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>", {})
+    end,
   }
   use {
     'MattesGroeger/vim-bookmarks',
     opt = true,
     -- TODO extract some vars for the telescope bindings
     keys = { 'n', '<leader>fm' },
-    config = function() require('telescope').load_extension('vim_bookmarks') end,
+    config = function()
+      require('telescope').load_extension('vim_bookmarks')
+      vim.keymap.set('n', '<leader>fm', "<cmd>lua require('telescope').extensions.vim_bookmarks.all()<cr>", {})
+    end,
   }
   use 'tom-anders/telescope-vim-bookmarks.nvim'
   use {
@@ -83,6 +117,7 @@ require('packer').startup(function(use)
           },
         },
       })
+      vim.keymap.set('n', '<leader>fy', "<cmd>lua require('telescope').extensions.neoclip.default()<cr>", {})
     end,
   }
   use 'mbbill/undotree'
@@ -106,7 +141,23 @@ require('packer').startup(function(use)
   }
 
   -- VCS
-  use 'tpope/vim-fugitive'
+  use {
+    'tpope/vim-fugitive',
+    config = function()
+      vim.keymap.set('n', 'ga', ':Git add .<CR>', {})
+      vim.keymap.set('n', 'gs', ':Git<CR>', {})
+      vim.keymap.set('n', 'gw', ':Gwrite<CR>', {})
+      vim.keymap.set('n', 'gc', ':Git commit<CR>', {})
+      vim.keymap.set('n', 'gca', ':Git commit --amend<CR>', {})
+      vim.keymap.set('n', 'gcne', ':Git commit --amend --no-edit<CR>', {})
+      vim.keymap.set('n', 'gd', ':Git diff<CR>', {})
+      vim.keymap.set('n', 'gm', ':GMove ', {})
+      vim.keymap.set('n', 'gco', ':GBranches<CR>', {})
+      vim.keymap.set('n', 'grid', ':Git rebase -i develop<CR>', {})
+      vim.keymap.set('n', 'gpoh', ':Git push origin head<CR>', {})
+      vim.keymap.set('n', 'gpfoh', ':Git push --force origin head<CR>', {})
+    end,
+  }
   use {
     'lewis6991/gitsigns.nvim',
     config = function()
@@ -119,6 +170,8 @@ require('packer').startup(function(use)
             opts.buffer = bufnr
             vim.keymap.set(mode, l, r, opts)
           end
+
+          map('n', 'gb', function() gs.blame_line{full=true} end)
 
           -- Navigation
           map('n', ']c',
@@ -138,8 +191,6 @@ require('packer').startup(function(use)
             end,
             {expr=true}
           )
-          
-          map('n', 'gb', function() gs.blame_line{full=true} end)
         end
        })
     end,
@@ -160,7 +211,10 @@ require('packer').startup(function(use)
     'psiska/telescope-hoogle.nvim',
     opt = true,
     ft = { 'haskell' },
-    config = function() require('telescope').load_extension('hoogle') end,
+    config = function()
+      require('telescope').load_extension('hoogle')
+      vim.keymap.set('n', '<leader>hg', "<cmd>lua require('telescope').extensions.hoogle.list()<cr>", {})
+    end,
   }
   use 'lukas-reineke/indent-blankline.nvim'
 
@@ -207,5 +261,3 @@ vim.g.UltiSnipsJumpBackwardTrigger = "<c-k>"
 vim.cmd([[
 let g#UltiSnipsSnippetDirectories = [$HOME."/.vim/snippets", $HOME."/.vim/plugged/vim_snippets/snippets"] 
 ]])
-
-require('gitsigns').setup()

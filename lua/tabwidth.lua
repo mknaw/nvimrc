@@ -23,9 +23,7 @@ end
 -- Expose the function as a global Vim command with optional argument
 vim.cmd('command! -nargs=? ToggleTabWidth lua toggle_tabwidth(<args>)')
 
---TODO forgot the right keybinding
---vim.api.nvim_set_keymap('n', '<C-t>', ':ToggleTabWidth<CR>', { noremap = true })
---vim.api.nvim_set_keymap('i', '<C-t>', ':ToggleTabWidth<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<C-t>', ':ToggleTabWidth<CR>', { noremap = true })
 
 --toggle_tabwidth(4)
 vim.opt.tabstop = 4

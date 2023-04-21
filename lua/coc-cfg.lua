@@ -15,7 +15,6 @@ nmap <silent> ,dv :call CocAction('jumpDefinition', 'vsplit')<CR>
 nmap <silent> ,ds :call CocAction('jumpDefinition', 'split')<CR>
 nmap <silent> ,dt :call CocAction('jumpDefinition', 'tabe')<CR>
 nmap <silent> <space>y <Plug>(coc-type-definition)
-nmap <silent> <space>i <Plug>(coc-implementation)
 nmap <silent> <space>r <Plug>(coc-references)
 
 let g:coc_disable_transparent_cursor = 1
