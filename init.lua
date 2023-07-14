@@ -122,6 +122,22 @@ nnoremap ipdb Oimport ipdb; ipdb.set_trace()<ESC>
 nnoremap rdb Ofrom celery.contrib import rdb; rdb.set_trace()<ESC>
 nnoremap <space>i :silent execute('!isort -q --dont-order-by-type ' . expand("%:p"))<cr>
 ]])
+-- TODO python only and a bit nasty in that it should take config from elsewhere
+vim.cmd([[
+  augroup FileTypePython
+    autocmd!
+    autocmd FileType python xnoremap <space>f :!black -q -t py311 -S --fast -l 120 -<CR>
+  augroup END
+]])
+
+-- TODO really should get SetTabWidth working instead...
+vim.cmd([[
+  augroup FileTypeTypescript
+    autocmd!
+    autocmd FileType typescript setlocal tabstop=2 shiftwidth=2 expandtab
+    autocmd FileType typescriptreact setlocal tabstop=2 shiftwidth=2 expandtab
+  augroup END
+]])
 
 vim.cmd([[
 " just do the obvious thing
@@ -133,3 +149,68 @@ command! Vs vs
 
 vim.g.netrw_banner = 0
 vim.g.netrw_liststyle = 3
+
+--jq_filter = function()
+--  local old_reg = vim.fn.getreg('"')
+--  vim.cmd('normal! gvy')
+--  local cmd = 'echo ' .. vim.fn.shellescape(vim.fn.getreg('"'), true) .. ' | jq .'
+--  local result = vim.fn.system(cmd)
+--  vim.cmd('normal! "_d')
+--  vim.cmd('put =' .. vim.fn.shellescape(result, true))
+--  vim.fn.setreg('"', old_reg)
+--end
+
+--vim.cmd('command! -range=% Jq <line1>,<line2>lua jq_filter()')
+
+pyjq = function()
+-- Yank the selection into the unnamed register
+  vim.cmd('normal! gvy')
+  
+  -- Create a command string to pass the yanked text into the Python script
+  local cmd = 'echo ' .. vim.fn.shellescape(vim.fn.getreg('"'), true) .. ' | pyjq'
+  
+  -- Execute the command
+  local result = vim.fn.systemlist(cmd)
+  
+  -- Open a new buffer in a split
+  vim.cmd('new')
+  vim.cmd('set filetype=json')
+  
+  -- Get the buffer number for the current buffer
+  local bufnr = vim.api.nvim_get_current_buf()
+  
+  -- Set the lines of the buffer to the output
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, result)
+end
+
+-- Note that the function call now includes the table name
+vim.cmd('command! -range=% Pyjq <line1>,<line2>lua pyjq()')
+
+pyxml = function()
+-- Yank the selection into the unnamed register
+  vim.cmd('normal! gvy')
+  
+  -- Create a command string to pass the yanked text into the Python script
+  local cmd = 'echo ' .. vim.fn.shellescape(vim.fn.getreg('"'), true) .. ' | pyxml'
+  
+  -- Execute the command
+  local result = vim.fn.systemlist(cmd)
+  
+  -- Open a new buffer in a split
+  vim.cmd('new')
+  vim.cmd('set filetype=xml')
+  
+  -- Get the buffer number for the current buffer
+  local bufnr = vim.api.nvim_get_current_buf()
+  
+  -- Set the lines of the buffer to the output
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, result)
+end
+
+-- Note that the function call now includes the table name
+vim.cmd('command! -range=% Pyxml <line1>,<line2>lua pyxml()')
+
+vim.cmd([[
+    set textwidth=120
+    set formatoptions-=t
+]])

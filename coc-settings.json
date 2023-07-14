@@ -44,19 +44,14 @@
   "inlayHint.enable": true,
   "rust-analyzer.inlayHints.typeHints.enable": true,
   "rust-analyzer.inlayHints.chainingHints.enable": true,
-  "rust-analyzer.checkOnSave.command_": "clippy",
 
   "python.formatting.provider": "black",
   "python.formatting.blackPath": "~/.pyenv/shims/black",
-  "python.formatting.blackArgs": "-S",
+  "python.formatting.blackArgs": ["-S"],
   "python.linting.enabled": false,
   "python.linting.flake8Enabled": false,
   "pyright.enable": true,
 
-  "prettier.tabWidth": 4,
-  "prettier.singleQuote": true,
-  "prettier.arrowParens": "avoid",
-  
-  "salesforcedx-vscode-apex.java.home": "/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home"
+  "eslint.autoFixOnSave": true,
 }
 

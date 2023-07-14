@@ -21,6 +21,9 @@ require('packer').startup(function(use)
       opt = true,
       keys = { '<leader>cc', '<leader>cu' },
       cmd = { 'NERDCommenterToggle', 'NERDCommenter' },
+      config = function()
+        vim.g.NERDDefaultAlign = 'left'
+      end,
   }
   use {
     'jremmen/vim-ripgrep',
@@ -35,23 +38,82 @@ require('packer').startup(function(use)
   use 'chaoren/vim-wordmotion'
   use 'tpope/vim-surround'
   use {
+    'nvim-treesitter/nvim-treesitter-context',
+    config = function()
+        require'treesitter-context'.setup{
+          enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+          max_lines = 1, -- How many lines the window should span. Values <= 0 mean no limit.
+          min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+          line_numbers = true,
+          multiline_threshold = 1, -- Maximum number of lines to collapse for a single context line
+          trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+          mode = 'topline',  -- Line used to calculate context. Choices: 'cursor', 'topline'
+          -- Separator between context and content. Should be a single character string, like '-'.
+          -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+          separator = nil,
+          zindex = 20, -- The Z-index of the context window
+          on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+        }
+    end
+  }
+  use {
     'mattn/emmet-vim',
-    ft = { 'html' },
+    ft = { 'html', 'typescriptreact' },
     opt = true,
     cmd = { 'EmmetInstall', 'EmmetUpdate', 'EmmetInstall!' },
   }
   use 'kshenoy/vim-signature'  -- gutter letters when making bookmarks
   use 'yssl/QFEnter'  -- open quickfix in various panes
-  -- TODO
-  --use {
-    --'L3MON4D3/LuaSnip',
-    --run = 'make install_jsregexp',
-    --config = function()
-        --vim.cmd([[ imap <silent><expr> <C-s> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>' ]])
-    --end,
-  --}
-  use 'SirVer/ultisnips'
+
+  use {
+    'L3MON4D3/LuaSnip',
+    run = 'make install_jsregexp',
+    config = function()
+      require('luasnip.loaders.from_vscode').lazy_load() local ls = require 'luasnip'
+
+      vim.keymap.set({ 'i', 's' }, '<c-s>', function()
+        if ls.expand_or_jumpable() then
+          ls.expand_or_jump()
+        end
+      end, { silent = true })
+
+      vim.keymap.set({ 'i', 's' }, '<c-j>', function()
+        if ls.expand_or_jumpable() then
+          ls.jump(1)
+        end
+      end, { silent = true })
+
+      vim.keymap.set({ 'i', 's' }, '<c-k>', function()
+        if ls.expand_or_jumpable() then
+          ls.jump(-1)
+        end
+      end, { silent = true })
+
+      --vim.cmd([[
+      --  " imap <silent><expr> <C-s> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<C-s>'
+      --  inoremap <silent> <C-j> <cmd>lua require('luasnip').jump(1)<Cr>
+      --  snoremap <silent> <C-j> <cmd>lua require('luasnip').jump(1)<Cr>
+      --  inoremap <silent> <C-k> <cmd>lua require('luasnip').jump(-1)<Cr>
+      --  snoremap <silent> <C-k> <cmd>lua require('luasnip').jump(-1)<Cr>
+      --]])
+    end,
+  }
+  use 'rafamadriz/friendly-snippets'
+  use {
+    'SirVer/ultisnips',
+    cond = false,
+    config = function()
+      vim.g.UltiSnipsExpandTrigger = "<c-s>"
+      vim.g.UltiSnipsListSnippets = "<c-_>"
+      vim.g.UltiSnipsJumpForwardTrigger = "<c-j>"
+      vim.g.UltiSnipsJumpBackwardTrigger = "<c-k>"
+      vim.cmd([[
+        let g#UltiSnipsSnippetDirectories = [$HOME."/.vim/snippets", $HOME."/.vim/plugged/vim_snippets/snippets"] 
+      ]])
+    end,
+  }
   use 'honza/vim-snippets'
+
   use {
     'Wansmer/treesj',
     requires = { 'nvim-treesitter' },
@@ -62,7 +124,7 @@ require('packer').startup(function(use)
       vim.keymap.set('n', '<space>m', require('treesj').toggle)
     end,
   }
-  use 'ludovicchabant/vim-gutentags'
+  -- use 'ludovicchabant/vim-gutentags'
   use 'nvim-lua/plenary.nvim'
   use {
     'nvim-telescope/telescope.nvim',
@@ -78,19 +140,27 @@ require('packer').startup(function(use)
         },
       }
 
+      require('telescope').load_extension('fzy_native')
+
       vim.keymap.set('n', '<leader>g', '<cmd>Telescope find_files<cr>', {})
       vim.keymap.set('n', '<leader>sp', '<cmd>Telescope find_files cwd=~/sp/<cr>', {})
+      vim.keymap.set('n', '<leader>ei', '<cmd>Telescope find_files cwd=~/ei/<cr>', {})
       vim.keymap.set('n', '<leader>cf', '<cmd>Telescope find_files cwd=~/.config/nvim/<cr>', {})
+      -- TODO should probably be able to just get this from the rtp?
+      vim.keymap.set('n', '<leader>nv', '<cmd>Telescope find_files cwd=~/.local/share/nvim/site/pack/packer/start<cr>', {})
       vim.keymap.set('n', '<leader>b', '<cmd>Telescope buffers', {})
       vim.keymap.set('n', '<leader>t', "<cmd>lua require('telescope.builtin').tags()<cr>", {})
       vim.keymap.set('n', '<leader>fg', '<cmd>Telescope live_grep<cr>', {})
       vim.keymap.set('n', '<leader>fo', "<cmd>lua require('telescope.builtin').oldfiles()<cr>", {})
       vim.keymap.set('n', '<leader>fh', "<cmd>lua require('telescope.builtin').help_tags()<cr>", {})
       vim.keymap.set('n', '<leader>fc', "<cmd>lua require('telescope.builtin').commands()<cr>", {})
-      vim.keymap.set('n', '<leader>fs', "<cmd>lua require('telescope.builtin').search_history()<cr>", {})
+      -- vim.keymap.set('n', '<leader>fs', "<cmd>lua require('telescope.builtin').search_history()<cr>", {})
       vim.keymap.set('n', '<leader>fq', "<cmd>lua require('telescope.builtin').quickfix()<cr>", {})
       vim.keymap.set('n', '<leader>fr', "<cmd>lua require('telescope.builtin').registers()<cr>", {})
       vim.keymap.set('n', '<leader>fz', "<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>", {})
+
+      require('telescope').load_extension('luasnip')
+      vim.keymap.set('n', '<leader>fs', "<cmd>lua require('telescope').extensions.luasnip.luasnip{}<cr>", {})
     end,
   }
   use {
@@ -120,9 +190,24 @@ require('packer').startup(function(use)
       vim.keymap.set('n', '<leader>fy', "<cmd>lua require('telescope').extensions.neoclip.default()<cr>", {})
     end,
   }
+  use {
+    'benfowler/telescope-luasnip.nvim',
+    module = 'telescope._extensions.luasnip',  -- if you wish to lazy-load
+  }
+
   use 'mbbill/undotree'
   use 'jeetsukumaran/vim-indentwise'  -- jump by indents
-  use 'github/copilot.vim'
+  use {
+    'github/copilot.vim',
+    config = function()
+      vim.g.copilot_no_tab_map = true
+      vim.g.copilot_assume_mapped = true
+      vim.api.nvim_set_keymap('i', '<C-^>', 'copilot#Accept("<CR>")', { silent = true, expr = true })
+      -- vim.api.nvim_set_keymap('i', '<C-j>', 'copilot#Next<CR>', { silent = true, expr = true })
+      -- vim.api.nvim_set_keymap('i', '<C-k>', 'copilot#Prev<CR>', { silent = true, expr = true })
+      vim.api.nvim_set_keymap('n', '<space>p', ':Copilot panel<CR>', { silent = true, expr = true })
+    end
+  }
   --use 'andythigpen/nvim-coverage'
   use {
     'ThePrimeagen/refactoring.nvim',
@@ -172,6 +257,7 @@ require('packer').startup(function(use)
           end
 
           map('n', 'gb', function() gs.blame_line{full=true} end)
+          map('n', 'rh', gs.reset_hunk)
 
           -- Navigation
           map('n', ']c',
@@ -204,7 +290,7 @@ require('packer').startup(function(use)
   }
   use {
     'nvim-treesitter/nvim-treesitter',
-    config = function() require('treesitter-cfg') end,
+    config = function()require('treesitter-cfg') end,
   }
   use { 'nvim-treesitter/playground', opt = true, cmd = { 'TSPlaygroundToggle', 'TSNodeUnderCursor' } }
   use {
@@ -229,14 +315,6 @@ end)
 
 vim.cmd([[ source ~/.config/nvim/plugin/argtextobj.vim ]])
 
-vim.g.copilot_no_tab_map = true
-vim.g.copilot_assume_mapped = true
-vim.api.nvim_set_keymap('i', '<C-^>', 'copilot#Accept("<CR>")', { silent = true, expr = true })
-vim.api.nvim_set_keymap('i', '<C-j>', 'copilot#Next<CR>', { silent = true, expr = true })
-vim.api.nvim_set_keymap('i', '<C-k>', 'copilot#Prev<CR>', { silent = true, expr = true })
-vim.api.nvim_set_keymap('n', '<space>p', ':Copilot panel<CR>', { silent = true, expr = true })
-
-
 vim.cmd([[
 let g:far#source = 'rg'
 " let g:far#source = 'rgnvim'
@@ -252,12 +330,4 @@ let g:user_emmet_settings = {
 \    'block_all_childless' : 1,
 \  },
 \}
-]])
-
-vim.g.UltiSnipsExpandTrigger = "<c-s>"
-vim.g.UltiSnipsListSnippets = "<c-_>"
-vim.g.UltiSnipsJumpForwardTrigger = "<c-j>"
-vim.g.UltiSnipsJumpBackwardTrigger = "<c-k>"
-vim.cmd([[
-let g#UltiSnipsSnippetDirectories = [$HOME."/.vim/snippets", $HOME."/.vim/plugged/vim_snippets/snippets"] 
 ]])
