@@ -138,9 +138,13 @@ require('packer').startup(function(use)
               },
             },
         },
+        extensions = {
+            fzy_native = {
+                override_generic_sorter = false,
+                override_file_sorter = true,
+            }
+        }
       }
-
-      require('telescope').load_extension('fzy_native')
 
       vim.keymap.set('n', '<leader>g', '<cmd>Telescope find_files<cr>', {})
       vim.keymap.set('n', '<leader>sp', '<cmd>Telescope find_files cwd=~/sp/<cr>', {})
@@ -158,20 +162,42 @@ require('packer').startup(function(use)
       vim.keymap.set('n', '<leader>fq', "<cmd>lua require('telescope.builtin').quickfix()<cr>", {})
       vim.keymap.set('n', '<leader>fr', "<cmd>lua require('telescope.builtin').registers()<cr>", {})
       vim.keymap.set('n', '<leader>fz', "<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>", {})
+      vim.keymap.set('n', '<leader>fm', '<cmd>Telescope harpoon marks<CR>', {})
 
       require('telescope').load_extension('luasnip')
       vim.keymap.set('n', '<leader>fs', "<cmd>lua require('telescope').extensions.luasnip.luasnip{}<cr>", {})
+
+      require('telescope').load_extension('fzy_native')
     end,
   }
+  use 'nvim-telescope/telescope-fzy-native.nvim'
   use {
     'MattesGroeger/vim-bookmarks',
-    opt = true,
+    opt = false,
     -- TODO extract some vars for the telescope bindings
-    keys = { 'n', '<leader>fm' },
+    --keys = { 'n', '<leader>fm' },
+    --config = function()
+      --require('telescope').load_extension('vim_bookmarks')
+      --vim.keymap.set('n', '<leader>fm', "<cmd>lua require('telescope').extensions.vim_bookmarks.all()<cr>", {})
+    --end,
+  }
+  use {
+    'ThePrimeagen/harpoon',
+    requires = { 'nvim-telescope/telescope.nvim' },
     config = function()
-      require('telescope').load_extension('vim_bookmarks')
-      vim.keymap.set('n', '<leader>fm', "<cmd>lua require('telescope').extensions.vim_bookmarks.all()<cr>", {})
-    end,
+      require("telescope").load_extension('harpoon')
+
+      require('harpoon').setup({
+        mark_branch = true,
+        -- enable tabline with harpoon marks
+        tabline = true,
+      })
+
+      vim.keymap.set('n', 'mm', '<cmd>lua require("harpoon.mark").add_file()<cr>', {})
+      vim.keymap.set('n', 'mx', '<cmd>lua require("harpoon.mark").clear_all()<cr>', {})
+      vim.keymap.set('n', 'm,', '<cmd>lua require("harpoon.ui").nav_prev()<cr>', {})
+      vim.keymap.set('n', 'm.', '<cmd>lua require("harpoon.ui").nav_next()<cr>', {})
+    end
   }
   use 'tom-anders/telescope-vim-bookmarks.nvim'
   use {
@@ -282,6 +308,14 @@ require('packer').startup(function(use)
     end,
   }
   use { 'kristijanhusak/vim-create-pr', opt = true, cmd = { 'PR' } }
+
+  use {
+    "klen/nvim-test",
+    config = function()
+      require('nvim-test').setup()
+      vim.keymap.set('n', '<SPACE>x', ':TestNearest<CR>', {})
+    end
+  }
 
   -- syntax
   use {
