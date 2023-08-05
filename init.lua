@@ -17,7 +17,6 @@ vim.cmd([[ command! Vimrc tabe ~/.config/nvim/init.lua ]])
 
 set.shell = 'zsh'
 
-set.syntax = 'off'  -- trees sat
 set.autoindent = true
 set.splitright = true
 set.splitbelow = true
@@ -214,3 +213,7 @@ vim.cmd([[
     set textwidth=120
     set formatoptions-=t
 ]])
+
+vim.api.nvim_create_autocmd({"BufEnter", "BufWinEnter"}, {
+  callback = function() vim.opt.syntax = "off" end
+})

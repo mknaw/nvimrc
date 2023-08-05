@@ -1,8 +1,10 @@
 {
   "coc.preferences.useQuickfixForLocations": true,
   "diagnostic.checkCurrentLine": true,
+
   "codeLens.enable": false,
   "suggest.noselect": true,
+  "suggest.triggerCompletionWait": 50,
 
   "languageserver": {
     "ruff-lsp": {
@@ -52,6 +54,6 @@
   "python.linting.flake8Enabled": false,
   "pyright.enable": true,
 
-  "eslint.autoFixOnSave": true,
+  "eslint.autoFixOnSave": true
 }
 

@@ -39,6 +39,7 @@ require('packer').startup(function(use)
   use 'tpope/vim-surround'
   use {
     'nvim-treesitter/nvim-treesitter-context',
+    requires = { 'nvim-treesitter' },
     config = function()
         require'treesitter-context'.setup{
           enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
@@ -309,13 +310,14 @@ require('packer').startup(function(use)
   }
   use { 'kristijanhusak/vim-create-pr', opt = true, cmd = { 'PR' } }
 
-  use {
-    "klen/nvim-test",
-    config = function()
-      require('nvim-test').setup()
-      vim.keymap.set('n', '<SPACE>x', ':TestNearest<CR>', {})
-    end
-  }
+  --use {
+  --  "klen/nvim-test",
+  --  requires = { 'nvim-treesitter' },
+  --  config = function()
+  --    require('nvim-test').setup()
+  --    vim.keymap.set('n', '<SPACE>x', ':TestNearest<CR>', {})
+  --  end
+  --}
 
   -- syntax
   use {
@@ -323,10 +325,20 @@ require('packer').startup(function(use)
     config = function() require('coc-cfg') end,
   }
   use {
-    'nvim-treesitter/nvim-treesitter',
-    config = function()require('treesitter-cfg') end,
-  }
-  use { 'nvim-treesitter/playground', opt = true, cmd = { 'TSPlaygroundToggle', 'TSNodeUnderCursor' } }
+      "nvim-treesitter/nvim-treesitter",
+      run = ':TSUpdate',
+      config = function() require('nvim-treesitter.configs').setup({
+        ensure_installed = { "lua", "python", "rust", "typescript" },
+        sync_install = true,
+        auto_install = true,
+        highlight = {
+          enable = true,
+          additional_vim_regex_highlighting = false,
+        },
+        incremental_selection = { enable = true },
+        textobjects = { enable = true },
+      }) end,
+    }
   use {
     'psiska/telescope-hoogle.nvim',
     opt = true,

@@ -1,28 +1,21 @@
-vim.cmd([[
-nmap <space>rn <Plug>(coc-rename)
+vim.opt.updatetime = 3000
+vim.g.coc_disable_transparent_cursor = 1
 
+vim.keymap.set('n', '<space>rn', '<Plug>(coc-rename)')
+vim.keymap.set('n', '[d', '<Plug>(coc-diagnostic-prev)', { silent = true })
+vim.keymap.set('n', ']d', '<Plug>(coc-diagnostic-next)', { silent = true })
+vim.keymap.set('n', ',d', '<Plug>(coc-definition)', { silent = true })
+vim.keymap.set('n', ',dv', ":call CocAction('jumpDefinition', 'vsplit')<CR>")
+vim.keymap.set('n', ',ds', ":call CocAction('jumpDefinition', 'split')<CR>")
+vim.keymap.set('n', ',dt', ":call CocAction('jumpDefinition', 'tabe')<CR>")
+vim.keymap.set('n', '<space>y', '<Plug>(coc-type-definition)', { silent = true })
+vim.keymap.set('n', '<space>r', '<Plug>(coc-references)', { silent = true })
+vim.keymap.set('n', '<space>a', ':<C-u>CocList diagnostics<cr>')
+
+vim.cmd([[
 " Add `:Format` command to format current buffer.
 command! -nargs=0 Format :call CocAction('format')
 
-" Use `[g` and `]g` to navigate diagnostics
-" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
-nmap <silent> [d <Plug>(coc-diagnostic-prev)
-nmap <silent> ]d <Plug>(coc-diagnostic-next)
-
-" GoTo code navigation.
-nmap <silent> ,d <Plug>(coc-definition)
-nmap <silent> ,dv :call CocAction('jumpDefinition', 'vsplit')<CR>
-nmap <silent> ,ds :call CocAction('jumpDefinition', 'split')<CR>
-nmap <silent> ,dt :call CocAction('jumpDefinition', 'tabe')<CR>
-nmap <silent> <space>y <Plug>(coc-type-definition)
-nmap <silent> <space>r <Plug>(coc-references)
-
-let g:coc_disable_transparent_cursor = 1
-
-command! OrganizeImports CocCommand pyright.organizeimports
-
-" nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
-nnoremap <space>a  :<C-u>CocList diagnostics<cr>
 
 
 function! g:ShowDocumentation()
