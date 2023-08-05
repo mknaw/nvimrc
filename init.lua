@@ -113,7 +113,6 @@ vim.keymap.set('n', '<space>w', ':w<cr>', {})
 vim.keymap.set('n', '<space>v', ':vs<cr>', {})
 vim.keymap.set('n', '<space>s', ':sp<cr>', {})
 vim.keymap.set('n', '<space>t', ':tabe<cr>', {})
-vim.keymap.set('n', '<space>f', ':Format<cr>', {})
 
 -- TODO python only
 vim.cmd([[
@@ -214,6 +213,6 @@ vim.cmd([[
     set formatoptions-=t
 ]])
 
-vim.api.nvim_create_autocmd({"BufEnter", "BufWinEnter"}, {
-  callback = function() vim.opt.syntax = "off" end
-})
+--vim.api.nvim_create_autocmd({"BufEnter", "BufWinEnter"}, {
+--  callback = function() vim.opt.syntax = "off" end
+--})
