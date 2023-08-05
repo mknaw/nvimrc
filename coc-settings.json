@@ -53,6 +53,7 @@
   "python.linting.enabled": false,
   "python.linting.flake8Enabled": false,
   "pyright.enable": true,
+  "Lua.diagnostics.globals": ["vim"],
 
   "eslint.autoFixOnSave": true
 }
