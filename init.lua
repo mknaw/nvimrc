@@ -6,7 +6,6 @@ vim.g.mapleader = ','
 
 require('plugins')
 require('aesthetics')
-require('tabwidth')
 
 vim.g.python_host_prog = '/usr/local/bin/python2'
 vim.g.python3_host_prog = '~/.pyenv/versions/nvim/bin/python3'
@@ -216,3 +215,7 @@ vim.cmd([[
 --vim.api.nvim_create_autocmd({"BufEnter", "BufWinEnter"}, {
 --  callback = function() vim.opt.syntax = "off" end
 --})
+set.cursorline = true
+
+-- Sync clipboard with system clipboard
+vim.o.clipboard = 'unnamedplus'

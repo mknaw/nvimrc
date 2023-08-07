@@ -47,6 +47,20 @@ require("lazy").setup({
                             }
                         }
                     end,
+                    ["pyright"] = function()
+                        require("lspconfig").pyright.setup {
+                            settings = {
+                                python = {
+                                    analysis = {
+                                        autoSearchPaths = true,
+                                        useLibraryCodeForTypes = true,
+                                        diagnosticMode = 'openFilesOnly',
+                                    },
+                                },
+                            },
+
+                        }
+                    end,
                 }
             })
         end,
@@ -69,11 +83,13 @@ require("lazy").setup({
             "hrsh7th/cmp-cmdline",
             "L3MON4D3/LuaSnip",
             "saadparwaiz1/cmp_luasnip",
+            "onsails/lspkind.nvim",
         },
         lazy = true,
         event = "InsertEnter",
         config = function()
             local cmp = require("cmp")
+            local lspkind = require("lspkind")
             cmp.setup({
                 snippet = {
                     expand = function(args)
@@ -84,6 +100,7 @@ require("lazy").setup({
                     { name = 'nvim_lsp' },
                     { name = 'luasnip' },
                     { name = 'buffer' },
+                    { name = 'path' },
                 }),
                 mapping = {
                     ["<Tab>"] = cmp.mapping(cmp.mapping.select_next_item(), { "i", "s" }),
@@ -97,6 +114,29 @@ require("lazy").setup({
                     behavior = cmp.ConfirmBehavior.Replace,
                     select = false,
                 },
+                formatting = {
+                    format = lspkind.cmp_format({
+                        mode = 'symbol',       -- show only symbol annotations
+                        maxwidth = 50,         -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+                        ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+                    })
+                }
+            })
+            cmp.setup.cmdline({ '/', '?' }, {
+                mapping = cmp.mapping.preset.cmdline(),
+                sources = {
+                    { name = 'buffer' }
+                }
+            })
+
+            -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+            cmp.setup.cmdline(':', {
+                mapping = cmp.mapping.preset.cmdline(),
+                sources = cmp.config.sources({
+                    { name = 'path' }
+                }, {
+                    { name = 'cmdline' }
+                })
             })
         end,
     },
@@ -107,13 +147,15 @@ require("lazy").setup({
         build = "make install_jsregexp",
         dependencies = {
             "rafamadriz/friendly-snippets",
-            "molleweide/LuaSnip-snippets.nvim",
+            --"molleweide/LuaSnip-snippets.nvim",
         },
         lazy = true,
         event = "InsertEnter",
         config = function()
             require("luasnip.loaders.from_vscode").lazy_load()
+            require("user.snippets")
             local ls = require "luasnip"
+            --ls.snippets = require("luasnip_snippets").load_snippets()
 
             vim.keymap.set({ "i", "s" }, "<c-s>", function()
                 if ls.expand_or_jumpable() then
@@ -196,9 +238,17 @@ require("lazy").setup({
         end
     },
     {
-        'windwp/nvim-ts-autotag',
-        dependencies = { 'nvim-treesitter' },
+        "windwp/nvim-ts-autotag",
+        dependencies = { "nvim-treesitter" },
+        lazy = true,
+        event = "InsertEnter",
         opts = {},
+    },
+    {
+        "nvim-treesitter/playground",
+        dependencies = { "nvim-treesitter" },
+        lazy = true,
+        cmd = { "TSPlaygroundToggle", "TSNodeUnderCursor" },
     },
 
     --telescopes
@@ -315,7 +365,13 @@ require("lazy").setup({
         dir = "~/.config/nvim/plugin/argtextobj.vim",
         enabled = false,
     },
-    "lukas-reineke/indent-blankline.nvim",
+    {
+        "ggandor/leap.nvim",
+        config = function ()
+            require('leap').add_default_mappings()
+            vim.keymap.del('v', 'x')
+        end
+    },
 
     -- aesthetics
     "ayu-theme/ayu-vim",
@@ -323,6 +379,8 @@ require("lazy").setup({
         'nvim-lualine/lualine.nvim',
         config = function() require('lualine-cfg') end,
     },
+    "lukas-reineke/indent-blankline.nvim",
+    "tpope/vim-sleuth",  -- detect tabstop automatically
 
     {
         "scrooloose/nerdcommenter",
@@ -374,27 +432,27 @@ require("lazy").setup({
         end,
     },
     {
-        'tpope/vim-fugitive',
+        "tpope/vim-fugitive",
         lazy = true,
         keys = {
-            { 'ga',   ':Git add .<CR>' },
-            { 'gs',   ':Git<CR>' },
-            { 'gw',   ':Gwrite<CR>' },
-            { 'gc',   ':Git commit<CR>' },
-            { 'gca',  ':Git commit --amend<CR>' },
-            { 'gcne', ':Git commit --amend --no-edit<CR>' },
-            { 'gd',   ':Git diff<CR>' },
-            { 'gm',   ':GMove ' },
-            { 'gco',  ':GBranches<CR>' },
-            { 'grid', ':Git rebase -i develop<CR>' },
-            { 'gpoh', ':Git push origin head<CR>' },
-            { 'gpfoh', ':Git push --force origin head<CR>'
+            { "ga",   ":Git add .<CR>" },
+            { "gs",   ":Git<CR>" },
+            { "gw",   ":Gwrite<CR>" },
+            { "gc",   ":Git commit<CR>" },
+            { "gca",  ":Git commit --amend<CR>" },
+            { "gcne", ":Git commit --amend --no-edit<CR>" },
+            { "gd",   ":Git diff<CR>" },
+            { "gm",   ":GMove " },
+            { "gco",  ":GBranches<CR>" },
+            { "grid", ":Git rebase -i develop<CR>" },
+            { "gpoh", ":Git push origin head<CR>" },
+            { "gpfoh", ":Git push --force origin head<CR>"
             } },
     },
     {
-        'kristijanhusak/vim-create-pr',
+        "kristijanhusak/vim-create-pr",
         lazy = true,
-        cmd = { 'PR' },
+        cmd = { "PR" },
     },
 
     --{
@@ -492,7 +550,6 @@ require("lazy").setup({
 --  }
 
 --  use 'mbbill/undotree'
---  use 'jeetsukumaran/vim-indentwise'  -- jump by indents
 --  --use 'andythigpen/nvim-coverage'
 --  use {
 --    'ThePrimeagen/refactoring.nvim',
