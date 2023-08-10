@@ -120,12 +120,12 @@ nnoremap rdb Ofrom celery.contrib import rdb; rdb.set_trace()<ESC>
 nnoremap <space>i :silent execute('!isort -q --dont-order-by-type ' . expand("%:p"))<cr>
 ]])
 -- TODO python only and a bit nasty in that it should take config from elsewhere
-vim.cmd([[
-  augroup FileTypePython
-    autocmd!
-    autocmd FileType python xnoremap <space>f :!black -q -t py311 -S --fast -l 120 -<CR>
-  augroup END
-]])
+--vim.cmd([[
+--  augroup FileTypePython
+--    autocmd!
+--    autocmd FileType python xnoremap <space>f :!black -q -t py311 -S --fast -l 120 -<CR>
+--  augroup END
+--]])
 
 -- TODO really should get SetTabWidth working instead...
 vim.cmd([[
@@ -159,7 +159,7 @@ vim.g.netrw_liststyle = 3
 
 --vim.cmd('command! -range=% Jq <line1>,<line2>lua jq_filter()')
 
-pyjq = function()
+local pyjq = function()
 -- Yank the selection into the unnamed register
   vim.cmd('normal! gvy')
   
@@ -219,3 +219,16 @@ set.cursorline = true
 
 -- Sync clipboard with system clipboard
 vim.o.clipboard = 'unnamedplus'
+
+set.scrolloff = 5
+
+
+-- Hide semantic highlights for functions
+vim.api.nvim_set_hl(0, '@lsp.type.function', {})
+
+-- Hide all semantic highlights
+for _, group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
+  vim.api.nvim_set_hl(0, group, {})
+end
+-- TODO
+-- You probably want these inside a |ColorScheme| autocommand.

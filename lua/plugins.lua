@@ -49,18 +49,25 @@ require("lazy").setup({
                     end,
                     ["pyright"] = function()
                         require("lspconfig").pyright.setup {
+                            -- TODO probably want our own root_dir instead of hacking the default_config
+                            -- or just take an env var...
                             settings = {
                                 python = {
                                     analysis = {
                                         autoSearchPaths = true,
                                         useLibraryCodeForTypes = true,
                                         diagnosticMode = 'openFilesOnly',
+                                        -- diagnosticMode = 'workspace',
                                     },
                                 },
                             },
-
                         }
                     end,
+                    ["hls"] = function()
+                        require('lspconfig')['hls'].setup {
+                            filetypes = { 'haskell', 'lhaskell', 'cabal' },
+                        }
+                    end
                 }
             })
         end,
@@ -72,6 +79,35 @@ require("lazy").setup({
             "williamboman/mason-lspconfig.nvim",
         },
         config = function() require("user.lsp") end,
+    },
+    {
+        "jose-elias-alvarez/null-ls.nvim",
+        config = function()
+            local null_ls = require("null-ls")
+            null_ls.setup({
+                sources = {
+                    null_ls.builtins.formatting.prettier,
+                    null_ls.builtins.diagnostics.eslint,
+                    null_ls.builtins.completion.spell,
+                }
+            })
+        end
+    },
+    {
+        'nvimdev/lspsaga.nvim',
+        opts = {
+            lightbulb = {
+                enable = false,
+            },
+            symbol_in_winbar = {
+                enable = false,
+            },
+        },
+        event = 'LspAttach',
+        dependencies = {
+            'nvim-treesitter/nvim-treesitter',
+            'nvim-tree/nvim-web-devicons',
+        }
     },
     {
         "hrsh7th/nvim-cmp",
@@ -200,6 +236,17 @@ require("lazy").setup({
             })
         end,
     },
+    {
+        "jackMort/ChatGPT.nvim",
+        event = "VeryLazy",
+        -- TODO replace me with gpt-4, eventually
+        opts = {},
+        dependencies = {
+            "MunifTanjim/nui.nvim",
+            "nvim-lua/plenary.nvim",
+            "nvim-telescope/telescope.nvim"
+        }
+    },
 
     -- treesitters
     {
@@ -263,10 +310,12 @@ require("lazy").setup({
             { "<leader>sp", "<cmd>Telescope find_files cwd=~/sp/<cr>" },
             { "<leader>ei", "<cmd>Telescope find_files cwd=~/ei/<cr>" },
             { "<leader>cf", "<cmd>Telescope find_files cwd=~/.config/nvim/<cr>" },
-            { "<leader>b",  "<cmd>Telescope buffers" },
+            { "<leader>nv", "<cmd>Telescope find_files cwd=~/.local/share/nvim/lazy/<cr>" },
+            -- { "<leader>b",  "<cmd>Telescope buffers" },
             --{ "<leader>t",  "<cmd>lua require('telescope.builtin').tags()<cr>" },
             { "<leader>fg", "<cmd>Telescope live_grep<cr>" },
             { "<leader>fo", "<cmd>lua require('telescope.builtin').oldfiles()<cr>" },
+            { "<leader>fj", "<cmd>lua require('telescope.builtin').jumplist()<cr>" },
             { "<leader>fh", "<cmd>lua require('telescope.builtin').help_tags()<cr>" },
             { "<leader>fc", "<cmd>lua require('telescope.builtin').commands()<cr>" },
             { "<leader>fq", "<cmd>lua require('telescope.builtin').quickfix()<cr>" },
@@ -329,19 +378,15 @@ require("lazy").setup({
             "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
             "MunifTanjim/nui.nvim",
         },
-        lazy = true,
+        lazy = false,
         keys = {
             { "<C-n>", "<cmd>Neotree toggle<cr>" },
-        }
+        },
+        config = {
+            hijack_netrw_behavior = "open_default",
+        },
     },
 
-    {
-        "chaoren/vim-wordmotion",
-        enabled = false,
-        config = function()
-            vim.g.wordmotion_prefix = "<leader>"
-        end,
-    },
     {
         "tpope/vim-surround",
         lazy = true,
@@ -365,12 +410,106 @@ require("lazy").setup({
         dir = "~/.config/nvim/plugin/argtextobj.vim",
         enabled = false,
     },
+
+    -- nav
     {
         "ggandor/leap.nvim",
-        config = function ()
+        lazy = true,
+        keys = { "s", "S" },
+        config = function()
             require('leap').add_default_mappings()
             vim.keymap.del('v', 'x')
         end
+    },
+    {
+        "ThePrimeagen/harpoon",
+        requires = { 'nvim-telescope/telescope.nvim' },
+        lazy = true,
+        keys = {
+            { 'mm',         '<cmd>lua require("harpoon.mark").add_file()<cr>' },
+            { 'mx',         '<cmd>lua require("harpoon.mark").clear_all()<cr>' },
+            { 'm,',         '<cmd>lua require("harpoon.ui").nav_prev()<cr>' },
+            { 'm.',         '<cmd>lua require("harpoon.ui").nav_next()<cr>' },
+            { '<leader>fm', '<cmd>Telescope harpoon marks<cr>' },
+        },
+        config = function()
+            require("telescope").load_extension("harpoon")
+            require("harpoon").setup({
+                mark_branch = true,
+            })
+        end
+    },
+    -- motions
+    {
+        "chaoren/vim-wordmotion",
+        init = function()
+            vim.g.wordmotion_prefix = "<leader>"
+        end,
+    },
+    {
+        "drybalka/tree-climber.nvim",
+        keys = {
+            { "gh", "<cmd>lua require('tree-climber').goto_parent()<cr>", mode = { "n", "v", "o" }, silent = true },
+            { "gl", "<cmd>lua require('tree-climber').goto_child()<cr>",  mode = { "n", "v", "o" }, silent = true },
+            { "gj", "<cmd>lua require('tree-climber').goto_next()<cr>",   mode = { "n", "v", "o" }, silent = true },
+            { "gk", "<cmd>lua require('tree-climber').goto_prev()<cr>",   mode = { "n", "v", "o" }, silent = true },
+            { ".",  "<cmd>lua require('tree-climber').select_node()<cr>", mode = { "n", "v", "o" }, silent = true },
+            --{ "<C-k>", "<cmd>lua require('tree-climber').swap_prev()<cr>", mode = "n", silent = true },
+            --{ "<C-j>", "<cmd>lua require('tree-climber').swap_next()<cr>", mode = "n", silent = true },
+        }
+    },
+    {
+        'RRethy/nvim-treesitter-textsubjects',
+        dependencies = { 'nvim-treesitter/nvim-treesitter' },
+        -- TODO actually specify `keys`?
+        event = "VeryLazy",
+        config = function()
+            require("nvim-treesitter.configs").setup {
+                textsubjects = {
+                    enable = true,
+                    prev_selection = ",", -- (Optional) keymap to select the previous selection
+                    keymaps = {
+                        ["."] = "textsubjects-smart",
+                    },
+                },
+            }
+        end
+    },
+    {
+        "scrooloose/nerdcommenter",
+        enabled = false,
+        --lazy = true,  TODO dont know how to make it work
+        --keys = { "<leader>cc" },
+        --cmd = { "NERDCommenterToggle" },
+        config = function()
+            vim.g.NERDDefaultAlign = "left"
+        end,
+    },
+    {
+        'numToStr/Comment.nvim',
+        opts = {
+            toggler = {
+                ---Line-comment toggle keymap
+                line = '<leader>cc',
+                ---Block-comment toggle keymap
+                block = '<leader>cb',
+            },
+            opleader = {
+                ---Line-comment toggle keymap
+                line = '<leader>cc',
+                ---Block-comment toggle keymap
+                block = '<leader>cb',
+            },
+            extra = {
+                ---Add comment on the line above
+                above = '<leader>ck',
+                ---Add comment on the line below
+                below = '<leader>cj',
+                ---Add comment at the end of line
+                eol = '<leader>cA',
+            },
+        },
+        lazy = false,
     },
 
     -- aesthetics
@@ -380,16 +519,10 @@ require("lazy").setup({
         config = function() require('lualine-cfg') end,
     },
     "lukas-reineke/indent-blankline.nvim",
-    "tpope/vim-sleuth",  -- detect tabstop automatically
-
+    "tpope/vim-sleuth", -- detect tabstop automatically
     {
-        "scrooloose/nerdcommenter",
-        --lazy = true,  TODO dont know how to make it work
-        --keys = { "<leader>cc" },
-        --cmd = { "NERDCommenterToggle" },
-        config = function()
-            vim.g.NERDDefaultAlign = "left"
-        end,
+        "stevearc/dressing.nvim",
+        event = "VeryLazy"
     },
 
     -- vcs
@@ -455,16 +588,17 @@ require("lazy").setup({
         cmd = { "PR" },
     },
 
-    --{
-    --    "folke/trouble.nvim",
-    --    dependencies = { "nvim-tree/nvim-web-devicons" },
-    --    lazy = true,
-    --    keys = { "<space>xx", "<cmd>TroubleToggle<cr>" },
-    --    cmd = { "TroubleToggle" },
-    --    opts = {
-    --        mode = "document_diagnostics",
-    --    }
-    --}
+    {
+        "folke/trouble.nvim",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        keys = {
+            { "<space>d", "<cmd>TroubleToggle<cr>" },
+        },
+        cmd = { "TroubleToggle" },
+        opts = {
+            mode = "document_diagnostics",
+        }
+    }
 })
 
 --require('packer').startup(function(use)
@@ -512,24 +646,6 @@ require("lazy").setup({
 --      --require('telescope').load_extension('vim_bookmarks')
 --      --vim.keymap.set('n', '<leader>fm', "<cmd>lua require('telescope').extensions.vim_bookmarks.all()<cr>", {})
 --    --end,
---  }
---  use {
---    'ThePrimeagen/harpoon',
---    requires = { 'nvim-telescope/telescope.nvim' },
---    config = function()
---      require("telescope").load_extension('harpoon')
-
---      require('harpoon').setup({
---        mark_branch = true,
---        -- enable tabline with harpoon marks
---        tabline = true,
---      })
-
---      vim.keymap.set('n', 'mm', '<cmd>lua require("harpoon.mark").add_file()<cr>', {})
---      vim.keymap.set('n', 'mx', '<cmd>lua require("harpoon.mark").clear_all()<cr>', {})
---      vim.keymap.set('n', 'm,', '<cmd>lua require("harpoon.ui").nav_prev()<cr>', {})
---      vim.keymap.set('n', 'm.', '<cmd>lua require("harpoon.ui").nav_next()<cr>', {})
---    end
 --  }
 --  use 'tom-anders/telescope-vim-bookmarks.nvim'
 --  use {
