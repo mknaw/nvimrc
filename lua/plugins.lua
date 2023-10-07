@@ -81,7 +81,19 @@ require("lazy").setup({
             "williamboman/mason.nvim",
             "williamboman/mason-lspconfig.nvim",
         },
-        config = function() require("user.lsp") end,
+        config = function()
+            -- pylyzer doesn't seem quite ready yet :(
+            -- so for now fall back to slow-ass pyright
+            -- local lspconfig = require 'lspconfig'
+            -- local configs = require 'lspconfig.configs'
+            -- if not configs.pylyzer then
+            --     configs.pylyzer = {
+            --         default_config = require("user.pylyzer")
+            --     }
+            -- end
+            -- lspconfig.pylyzer.setup {}
+            require("user.lsp")
+        end,
     },
     {
         "jose-elias-alvarez/null-ls.nvim",
