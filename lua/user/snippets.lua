@@ -5,7 +5,7 @@ local snip = ls.snippet
 local text = ls.text_node
 local i = ls.insert_node
 --local insert = ls.insert_node
---local func = ls.function_node
+local func = ls.function_node
 --local choice = ls.choice_node
 --local dynamicn = ls.dynamic_node
 
@@ -38,6 +38,27 @@ ls.add_snippets(nil, {
             -- TODO could improve by surrounding with quotes...
             i(1),
             text(")"),
+        }),
+        snip({
+                trig = "docs",
+                namr = "docstring",
+                dscr = "Create docstring"
+            },
+            {
+                text('"""'),
+                func(function(_, s)
+                    return s.env.TM_SELECTED_TEXT[1] or {}
+                end, {}),
+                text('"""'),
+            }),
+        snip({
+            trig = "get_context_data",
+            name = "get_context_data",
+            dscr = "django get_context_data",
+        }, {
+            text("def get_context_data(self, **kwargs):\n"),
+            text("    context = super().get_context_data(**kwargs)\n"),
+            text("    return context"),
         }),
     },
     haskell = {

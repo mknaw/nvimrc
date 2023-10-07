@@ -52,8 +52,8 @@ vim.keymap.set('n', '<space>b', '<c-^>', { silent = true })
 vim.keymap.set('n', 'yy', 'y$', {})
 
 -- big steps
-vim.keymap.set({ 'n', 'v' }, 'J', '10j', {})
-vim.keymap.set({ 'n', 'v' }, 'K', '10k', {})
+vim.keymap.set({ 'n', 'v' }, 'J', '20j', {})
+vim.keymap.set({ 'n', 'v' }, 'K', '20k', {})
 
 -- big cut
 vim.keymap.set('n', 'X', 'VX', {})
@@ -160,22 +160,22 @@ vim.g.netrw_liststyle = 3
 --vim.cmd('command! -range=% Jq <line1>,<line2>lua jq_filter()')
 
 local pyjq = function()
--- Yank the selection into the unnamed register
+  -- Yank the selection into the unnamed register
   vim.cmd('normal! gvy')
-  
+
   -- Create a command string to pass the yanked text into the Python script
   local cmd = 'echo ' .. vim.fn.shellescape(vim.fn.getreg('"'), true) .. ' | pyjq'
-  
+
   -- Execute the command
   local result = vim.fn.systemlist(cmd)
-  
+
   -- Open a new buffer in a split
   vim.cmd('new')
   vim.cmd('set filetype=json')
-  
+
   -- Get the buffer number for the current buffer
   local bufnr = vim.api.nvim_get_current_buf()
-  
+
   -- Set the lines of the buffer to the output
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, result)
 end
@@ -184,22 +184,22 @@ end
 vim.cmd('command! -range=% Pyjq <line1>,<line2>lua pyjq()')
 
 pyxml = function()
--- Yank the selection into the unnamed register
+  -- Yank the selection into the unnamed register
   vim.cmd('normal! gvy')
-  
+
   -- Create a command string to pass the yanked text into the Python script
   local cmd = 'echo ' .. vim.fn.shellescape(vim.fn.getreg('"'), true) .. ' | pyxml'
-  
+
   -- Execute the command
   local result = vim.fn.systemlist(cmd)
-  
+
   -- Open a new buffer in a split
   vim.cmd('new')
   vim.cmd('set filetype=xml')
-  
+
   -- Get the buffer number for the current buffer
   local bufnr = vim.api.nvim_get_current_buf()
-  
+
   -- Set the lines of the buffer to the output
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, result)
 end
@@ -218,7 +218,7 @@ vim.cmd([[
 set.cursorline = true
 
 -- Sync clipboard with system clipboard
-vim.o.clipboard = 'unnamedplus'
+-- vim.o.clipboard = 'unnamedplus'
 
 set.scrolloff = 5
 
@@ -232,3 +232,10 @@ for _, group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
 end
 -- TODO
 -- You probably want these inside a |ColorScheme| autocommand.
+--
+-- " lazy drawing
+set.lazyredraw = true
+set.ttyfast    = true
+
+vim.api.nvim_set_hl(0, "FloatBorder", { link = "TelescopeNormal" })
+vim.api.nvim_set_hl(0, "ErrorMsg", { link = "Todo" })

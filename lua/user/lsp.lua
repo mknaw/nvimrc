@@ -2,7 +2,21 @@ vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspConfig', {}),
     callback = function(ev)
         -- Show all diagnostics on current line in floating window
-        vim.cmd('autocmd CursorHold * Lspsaga show_line_diagnostics ++unfocus')
+        -- TODO this is nicer because of the unfocus, but otherwise doesn't look better
+        -- than the built-in. but it looks worse than the `diagnostic_jump_next`.
+        -- so try to hack it to make it like `diagnostic_jump_next`.
+        -- vim.cmd('autocmd CursorHold * Lspsaga show_line_diagnostics ++unfocus')
+        -- vim.cmd('autocmd CursorHold * <cmd>lua vim.diagnostic.open_float()<CR>')
+        vim.api.nvim_create_autocmd('CursorHold', {
+            callback = function()
+                for _, winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+                    if vim.api.nvim_win_get_config(winid).zindex then
+                        return
+                    end
+                end
+                vim.diagnostic.open_float { focusable = false }
+            end,
+        })
         vim.o.updatetime = 400
         -- vim.api.nvim_set_keymap(
         --  'n', '<Leader>x', ':lua vim.diagnostic.open_float()<CR>',
@@ -17,9 +31,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
         local opts = { buffer = ev.buf }
         -- TODO this seems to look worse than the standard one, not sure why
         -- vim.keymap.set('n', '<leader>D', '<cmd>Lspsaga hover_doc<CR>', opts)
-        vim.keymap.set('n', '<leader>D', vim.lsp.buf.declaration, opts)
+        vim.keymap.set('n', '<leader>D', vim.lsp.buf.hover, opts)
         vim.keymap.set('n', '<leader>d', vim.lsp.buf.definition, opts)
-        vim.keymap.set('n', '<leader>dd', '<cmd>Lspsaga peek_definition ++unfocus<cr>', opts)
+        -- vim.keymap.set('n', '<leader>dd', '<cmd>Lspsaga peek_definition ++unfocus<cr>', opts)
         vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
         -- TODO doesnt work for whatever reason
         -- vim.keymap.set('n', '<space>rn', '<CMD>Lspsaga lsp_rename ++project<CR>', opts)
@@ -28,9 +42,10 @@ vim.api.nvim_create_autocmd('LspAttach', {
         vim.keymap.set('n', '<space>f', function()
             vim.lsp.buf.format { async = true }
         end, opts)
+        -- vim.keymap.set({ 'v', 'V' }, '<space>f', vim.lsp.buf.range_formatting)
         vim.api.nvim_set_keymap(
-            -- TODO not sure why only `diagnostic_jump_next` has more opts like codeactions
-            -- 'n', ']d', '<cmd>Lspsaga diagnostic_jump_next<CR>',
+        -- TODO not sure why only `diagnostic_jump_next` has more opts like codeactions
+        -- 'n', ']d', '<cmd>Lspsaga diagnostic_jump_next<CR>',
             'n', ']d', ':lua vim.diagnostic.goto_next()<CR>',
             { noremap = true, silent = true }
         )
@@ -38,19 +53,31 @@ vim.api.nvim_create_autocmd('LspAttach', {
             'n', '[d', ':lua vim.diagnostic.goto_prev()<CR>',
             { noremap = true, silent = true }
         )
+
+        function FormatFunction()
+            vim.lsp.buf.format({
+                async = true,
+                range = {
+                    ["start"] = vim.api.nvim_buf_get_mark(0, "<"),
+                    ["end"] = vim.api.nvim_buf_get_mark(0, ">"),
+                }
+            })
+        end
+
+        vim.api.nvim_set_keymap("v", "<space>f", "<Esc><cmd>lua FormatFunction()<CR>", { noremap = true })
     end,
 })
 
 vim.diagnostic.config({
     virtual_text = false, -- Turn off inline diagnostics
-    -- TODO
-    --signs = {
-    --    { name = "DiagnosticSignError", text = "" },
-    --    { name = "DiagnosticSignWarn", text = "" },
-    --    { name = "DiagnosticSignHint", text = "" },
-    --    { name = "DiagnosticSignInfo", text = " " },
-    --},
 })
+
+vim.cmd([[
+    sign define DiagnosticSignError text= texthl=DiagnosticError linehl= numhl=
+    sign define DiagnosticSignWarn  text= texthl=DiagnosticWarn  linehl= numhl=
+    sign define DiagnosticSignInfo  text=  texthl=DiagnosticInfo  linehl= numhl=
+    sign define DiagnosticSignHint  text= texthl=DiagnosticHint  linehl= numhl=
+]])
 
 -- Use this if you want it to automatically show all diagnostics on the
 -- current line in a floating window. Personally, I find this a bit

@@ -15,12 +15,6 @@ require("lazy").setup({
     "nvim-lua/plenary.nvim",
     --  LSPs
     {
-        "neoclide/coc.nvim",
-        build = "npm install",
-        enabled = false,
-        config = function() require("coc-cfg") end,
-    },
-    {
         "williamboman/mason.nvim",
         opts = {},
     },
@@ -33,9 +27,18 @@ require("lazy").setup({
                     function(server_name)
                         require("lspconfig")[server_name].setup {}
                     end,
-                    --["rust_analyzer"] = function()
-                    --    require("rust-tools").setup {}
-                    --end,
+                    ["rust_analyzer"] = function()
+                        require("rust-tools").setup {}
+                        require("lspconfig").rust_analyzer.setup {
+                            settings = {
+                                ["rust-analyzer"] = {
+                                    checkOnSave = {
+                                        command = "clippy",
+                                    },
+                                },
+                            },
+                        }
+                    end,
                     ["lua_ls"] = function()
                         require("lspconfig").lua_ls.setup {
                             settings = {
@@ -67,7 +70,7 @@ require("lazy").setup({
                         require('lspconfig')['hls'].setup {
                             filetypes = { 'haskell', 'lhaskell', 'cabal' },
                         }
-                    end
+                    end,
                 }
             })
         end,
@@ -87,14 +90,18 @@ require("lazy").setup({
             null_ls.setup({
                 sources = {
                     null_ls.builtins.formatting.prettier,
-                    null_ls.builtins.diagnostics.eslint,
-                    null_ls.builtins.completion.spell,
+                    -- null_ls.builtins.diagnostics.eslint,
+                    -- null_ls.builtins.completion.spell,
+                    null_ls.builtins.formatting.black.with({
+                        extra_args = { "-S", "-l", "120" },
+                    }),
                 }
             })
         end
     },
     {
         'nvimdev/lspsaga.nvim',
+        enabled = false, -- Seems buggy?
         opts = {
             lightbulb = {
                 enable = false,
@@ -107,6 +114,12 @@ require("lazy").setup({
         dependencies = {
             'nvim-treesitter/nvim-treesitter',
             'nvim-tree/nvim-web-devicons',
+        }
+    },
+    {
+        'simrat39/rust-tools.nvim',
+        dependencies = {
+            'neovim/nvim-lspconfig',
         }
     },
     {
@@ -133,7 +146,15 @@ require("lazy").setup({
                     end,
                 },
                 sources = cmp.config.sources({
-                    { name = 'nvim_lsp' },
+                    {
+                        name = 'nvim_lsp',
+                        entry_filter = function(entry, ctx)
+                            local types = require('cmp.types')
+                            local kind = types.lsp.CompletionItemKind[entry:get_kind()]
+                            if kind == "Text" then return false end
+                            return true
+                        end
+                    },
                     { name = 'luasnip' },
                     { name = 'buffer' },
                     { name = 'path' },
@@ -199,6 +220,10 @@ require("lazy").setup({
                 end
             end, { silent = true })
 
+            ls.config.set_config({
+                store_selection_keys = '<c-s>',
+            })
+
             vim.keymap.set({ "i", "s" }, "<c-j>", function()
                 if ls.expand_or_jumpable() then
                     ls.jump(1)
@@ -229,8 +254,8 @@ require("lazy").setup({
                         accept = "<C-^>",
                         accept_word = false,
                         accept_line = false,
-                        next = "<C-j>",
-                        prev = "<C-k>",
+                        -- next = "<C-j>",
+                        -- prev = "<C-k>",
                     },
                 },
             })
@@ -238,14 +263,42 @@ require("lazy").setup({
     },
     {
         "jackMort/ChatGPT.nvim",
-        event = "VeryLazy",
-        -- TODO replace me with gpt-4, eventually
-        opts = {},
         dependencies = {
             "MunifTanjim/nui.nvim",
             "nvim-lua/plenary.nvim",
             "nvim-telescope/telescope.nvim"
-        }
+        },
+        event = "VeryLazy",
+        -- TODO replace me with gpt-4, eventually
+        config = function()
+            require("chatgpt").setup({
+                yank_register = "",
+                actions_paths = {
+                    "~/.config/nvim/chatgpt_run_actions.json",
+                },
+                chat = {
+                    -- apparently not fucking usable!
+                    keymaps = {
+                        close = { "<C-c>" },
+                        yank_last = "<C-a>",
+                        -- yank_last_code = "<C-k>",
+                        scroll_up = "<C-u>",
+                        scroll_down = "<C-d>",
+                        new_session = "<C-n>",
+                        cycle_windows = "<Tab>",
+                        cycle_modes = "<C-f>",
+                        select_session = "<Space>",
+                        rename_session = "r",
+                        delete_session = "d",
+                        -- draft_message = "<C-d>",
+                        toggle_settings = "<C-d>",
+                        toggle_message_role = "<C-r>",
+                        toggle_system_role_open = "<C-s>",
+                        stop_generating = "<C-x>",
+                    },
+                },
+            })
+        end,
     },
 
     -- treesitters
@@ -259,9 +312,63 @@ require("lazy").setup({
                     additional_vim_regex_highlighting = false,
                 },
                 incremental_selection = { enable = false },
-                textobjects = { enable = false },
+                textobjects = {
+                    select = {
+                        enable = true
+                    },
+                    move = {
+                        enable = true,
+                        set_jumps = true, -- whether to set jumps in the jumplist
+                        goto_next_start = {
+                            ["]m"] = "@function.outer",
+                            -- ["]]"] = { query = "@class.outer", desc = "Next class start" },
+                            --
+                            -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queires.
+                            -- ["]o"] = "@loop.*",
+                            -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
+                            --
+                            -- You can pass a query group to use query from `queries/<lang>/<query_group>.scm file in your runtime path.
+                            -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They also provide highlights.scm and indent.scm.
+                            ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
+                            ["]z"] = { query = "@fold", query_group = "folds", desc = "Next fold" },
+                        },
+                        goto_next_end = {
+                            ["]M"] = "@function.outer",
+                            ["]["] = "@class.outer",
+                        },
+                        goto_previous_start = {
+                            ["[m"] = "@function.outer",
+                            -- ["[["] = "@class.outer",
+                        },
+                        goto_previous_end = {
+                            ["[M"] = "@function.outer",
+                            ["[]"] = "@class.outer",
+                        },
+                        -- Below will go to either the start or the end, whichever is closer.
+                        -- Use if you want more granular movements
+                        -- Make it even more gradual by adding multiple queries and regex.
+                        -- goto_next = {
+                        --     ["]d"] = "@conditional.outer",
+                        -- },
+                        -- goto_previous = {
+                        --     ["[d"] = "@conditional.outer",
+                        -- }
+                    },
+                    swap = {
+                        enable = true
+                    },
+                },
+                use_languagetree = false,
+                additional_vim_regex_highlighting = false,
+                indent = {
+                    enable = false
+                },
             })
         end,
+    },
+    {
+        "nvim-treesitter/nvim-treesitter-textobjects",
+        dependencies = { "nvim-treesitter/nvim-treesitter" },
     },
     {
         'nvim-treesitter/nvim-treesitter-context',
@@ -378,18 +485,18 @@ require("lazy").setup({
             "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
             "MunifTanjim/nui.nvim",
         },
-        lazy = false,
+        event = "VeryLazy",
         keys = {
             { "<C-n>", "<cmd>Neotree toggle<cr>" },
         },
-        config = {
+        opts = {
             hijack_netrw_behavior = "open_default",
         },
     },
 
     {
         "tpope/vim-surround",
-        lazy = true,
+        lazy = false,
         keys = {
             { "S", mode = "v" },
         }
@@ -404,8 +511,13 @@ require("lazy").setup({
         lazy = true,
         ft = { "csv" },
     },
-    "kshenoy/vim-signature", -- gutter letters when making bookmarks
-    "yssl/QFEnter",          -- open quickfix in various panes
+    {
+        "chentoast/marks.nvim", -- gutter letters when making bookmarks
+        opts = {
+            refresh_interval = 500,
+        }
+    },
+    "yssl/QFEnter", -- open quickfix in various panes
     {
         dir = "~/.config/nvim/plugin/argtextobj.vim",
         enabled = false,
@@ -423,7 +535,7 @@ require("lazy").setup({
     },
     {
         "ThePrimeagen/harpoon",
-        requires = { 'nvim-telescope/telescope.nvim' },
+        dependencies = { 'nvim-telescope/telescope.nvim' },
         lazy = true,
         keys = {
             { 'mm',         '<cmd>lua require("harpoon.mark").add_file()<cr>' },
@@ -432,11 +544,11 @@ require("lazy").setup({
             { 'm.',         '<cmd>lua require("harpoon.ui").nav_next()<cr>' },
             { '<leader>fm', '<cmd>Telescope harpoon marks<cr>' },
         },
+        opts = {
+            mark_branch = true,
+        },
         config = function()
             require("telescope").load_extension("harpoon")
-            require("harpoon").setup({
-                mark_branch = true,
-            })
         end
     },
     -- motions
@@ -447,15 +559,48 @@ require("lazy").setup({
         end,
     },
     {
+        "kana/vim-smartword",
+        keys = {
+            { "w",  "<Plug>(smartword-w)" },
+            { "e",  "<Plug>(smartword-e)" },
+            { "b",  "<Plug>(smartword-b)" },
+            { "ge", "<Plug>(smartword-ge)" },
+        }
+    },
+    {
+        "chrisgrieser/nvim-various-textobjs",
+        lazy = false,
+        config = function()
+            require("various-textobjs").setup({ useDefaultKeymaps = true })
+            vim.keymap.set("n", "dsi", function()
+                -- select inner indentation
+                require("various-textobjs").indentation(true, true)
+
+                -- plugin only switches to visual mode when a textobj has been found
+                local notOnIndentedLine = vim.fn.mode():find("V") == nil
+                if notOnIndentedLine then return end
+
+                -- dedent indentation
+                vim.cmd.normal { "<", bang = true }
+
+                -- delete surrounding lines
+                local endBorderLn = vim.api.nvim_buf_get_mark(0, ">")[1] + 1
+                local startBorderLn = vim.api.nvim_buf_get_mark(0, "<")[1] - 1
+                vim.cmd(tostring(endBorderLn) .. " delete") -- delete end first so line index is not shifted
+                vim.cmd(tostring(startBorderLn) .. " delete")
+            end, { desc = "Delete surrounding indentation" })
+        end
+    },
+    {
         "drybalka/tree-climber.nvim",
         keys = {
-            { "gh", "<cmd>lua require('tree-climber').goto_parent()<cr>", mode = { "n", "v", "o" }, silent = true },
-            { "gl", "<cmd>lua require('tree-climber').goto_child()<cr>",  mode = { "n", "v", "o" }, silent = true },
-            { "gj", "<cmd>lua require('tree-climber').goto_next()<cr>",   mode = { "n", "v", "o" }, silent = true },
-            { "gk", "<cmd>lua require('tree-climber').goto_prev()<cr>",   mode = { "n", "v", "o" }, silent = true },
-            { ".",  "<cmd>lua require('tree-climber').select_node()<cr>", mode = { "n", "v", "o" }, silent = true },
-            --{ "<C-k>", "<cmd>lua require('tree-climber').swap_prev()<cr>", mode = "n", silent = true },
-            --{ "<C-j>", "<cmd>lua require('tree-climber').swap_next()<cr>", mode = "n", silent = true },
+            { "gh",         "<cmd>lua require('tree-climber').goto_parent()<cr>", mode = { "n", "v", "o" }, silent = true },
+            { "gl",         "<cmd>lua require('tree-climber').goto_child()<cr>",  mode = { "n", "v", "o" }, silent = true },
+            { "gj",         "<cmd>lua require('tree-climber').goto_next()<cr>",   mode = { "n", "v", "o" }, silent = true },
+            { "gk",         "<cmd>lua require('tree-climber').goto_prev()<cr>",   mode = { "n", "v", "o" }, silent = true },
+            -- TODO not sure if these keymaps are great
+            { "<C-k><C-k>", "<cmd>lua require('tree-climber').swap_prev()<cr>",   mode = "n",               silent = true },
+            { "<C-j><C-j>", "<cmd>lua require('tree-climber').swap_next()<cr>",   mode = "n",               silent = true },
         }
     },
     {
@@ -467,7 +612,7 @@ require("lazy").setup({
             require("nvim-treesitter.configs").setup {
                 textsubjects = {
                     enable = true,
-                    prev_selection = ",", -- (Optional) keymap to select the previous selection
+                    prev_selection = "", -- (Optional) keymap to select the previous selection
                     keymaps = {
                         ["."] = "textsubjects-smart",
                     },
@@ -476,40 +621,34 @@ require("lazy").setup({
         end
     },
     {
-        "scrooloose/nerdcommenter",
-        enabled = false,
-        --lazy = true,  TODO dont know how to make it work
-        --keys = { "<leader>cc" },
-        --cmd = { "NERDCommenterToggle" },
-        config = function()
-            vim.g.NERDDefaultAlign = "left"
-        end,
-    },
-    {
         'numToStr/Comment.nvim',
-        opts = {
-            toggler = {
-                ---Line-comment toggle keymap
-                line = '<leader>cc',
-                ---Block-comment toggle keymap
-                block = '<leader>cb',
-            },
-            opleader = {
-                ---Line-comment toggle keymap
-                line = '<leader>cc',
-                ---Block-comment toggle keymap
-                block = '<leader>cb',
-            },
-            extra = {
-                ---Add comment on the line above
-                above = '<leader>ck',
-                ---Add comment on the line below
-                below = '<leader>cj',
-                ---Add comment at the end of line
-                eol = '<leader>cA',
-            },
-        },
         lazy = false,
+        config = function()
+            require('Comment').setup({
+                toggler = {
+                    ---Line-comment toggle keymap
+                    line = '<leader>cc',
+                    ---Block-comment toggle keymap
+                    block = '<leader>cb',
+                },
+                opleader = {
+                    ---Line-comment toggle keymap
+                    line = '<leader>cc',
+                    ---Block-comment toggle keymap
+                    block = '<leader>cb',
+                },
+                extra = {
+                    ---Add comment on the line above
+                    above = '<leader>ck',
+                    ---Add comment on the line below
+                    below = '<leader>cj',
+                    ---Add comment at the end of line
+                    eol = '<leader>cA',
+                },
+            })
+            local ft = require('Comment.ft')
+            ft.htmldjango = '{# %s #}'
+        end
     },
 
     -- aesthetics
@@ -580,7 +719,8 @@ require("lazy").setup({
             { "grid", ":Git rebase -i develop<CR>" },
             { "gpoh", ":Git push origin head<CR>" },
             { "gpfoh", ":Git push --force origin head<CR>"
-            } },
+            }
+        },
     },
     {
         "kristijanhusak/vim-create-pr",
@@ -598,8 +738,51 @@ require("lazy").setup({
         opts = {
             mode = "document_diagnostics",
         }
-    }
+    },
+
+    {
+        "folke/which-key.nvim",
+        enabled = false,
+        event = "VeryLazy",
+        init = function()
+            vim.o.timeout = true
+            vim.o.timeoutlen = 300
+        end,
+        opts = {}
+    },
+
+    {
+        "klen/nvim-test",
+        dependencies = { 'nvim-treesitter' },
+        keys = {
+            { '<space>tt', ':TestNearest<CR>' },
+        },
+        opts = {},
+        -- config = function()
+        --     require('nvim-test').setup()
+        --     require('nvim-test.runners.pytest'):setup {
+        --         command = { (vim.env.VIRTUAL_ENV or "venv") .. "/bin/pytest", "pytest -s" },
+        --         file_pattern = "\\v(test_[^.]+|[^.]+_test|tests)\\.py$",
+        --         find_files = { "test_{name}.py", "{name}_test.py", "tests.py" },
+        --     }
+        -- end
+    },
+
+    {
+        "kevinhwang91/nvim-bqf"
+    },
+    {
+        "rcarriga/nvim-notify",
+        event = "VeryLazy",
+        init = function()
+            vim.notify = require("notify")
+        end,
+    },
 })
+
+-- maybe interesting list:
+-- 'ThePrimeagen/refactoring.nvim',
+-- genghis
 
 --require('packer').startup(function(use)
 --  use {
@@ -667,31 +850,8 @@ require("lazy").setup({
 
 --  use 'mbbill/undotree'
 --  --use 'andythigpen/nvim-coverage'
---  use {
---    'ThePrimeagen/refactoring.nvim',
---    opt = true,
---    keys = { 'v', '<leader>rr' },
---    config = function()
---        require('telescope').load_extension('refactoring')
---        -- remap to open the Telescope refactoring menu in visual mode
---        vim.api.nvim_set_keymap(
---          'v',
---          '<leader>rr',
---          "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
---          { noremap = true }
---        )
---    end,
---  }
 
 
---  --use {
---  --  "klen/nvim-test",
---  --  requires = { 'nvim-treesitter' },
---  --  config = function()
---  --    require('nvim-test').setup()
---  --    vim.keymap.set('n', '<SPACE>x', ':TestNearest<CR>', {})
---  --  end
---  --}
 
 --  use {
 --    'psiska/telescope-hoogle.nvim',
