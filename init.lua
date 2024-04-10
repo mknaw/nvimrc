@@ -52,8 +52,8 @@ vim.keymap.set('n', '<space>b', '<c-^>', { silent = true })
 vim.keymap.set('n', 'yy', 'y$', {})
 
 -- big steps
-vim.keymap.set({ 'n', 'v' }, 'J', '20j', {})
-vim.keymap.set({ 'n', 'v' }, 'K', '20k', {})
+vim.keymap.set({ 'n', 'v' }, 'J', '14j', {})
+vim.keymap.set({ 'n', 'v' }, 'K', '14k', {})
 
 -- big cut
 vim.keymap.set('n', 'X', 'VX', {})
@@ -104,9 +104,27 @@ let g:wordmotion_mappings = {
 
 ]])
 
-vim.keymap.set('n', '<space>c', ':ccl<cr>', {})
-vim.keymap.set('n', '<space>q', ':wq!<cr>', {})
-vim.keymap.set('n', '<space>e', ':e!<cr>', {})
+
+local toggle_qf = function()
+  local qf_exists = false
+  for _, win in pairs(vim.fn.getwininfo()) do
+    if win["quickfix"] == 1 then
+      qf_exists = true
+    end
+  end
+  if qf_exists == true then
+    vim.cmd "cclose"
+    return
+  end
+  if not vim.tbl_isempty(vim.fn.getqflist()) then
+    vim.cmd "copen"
+  end
+end
+
+vim.keymap.set('n', '<space>c', toggle_qf, {})
+vim.keymap.set('n', '<space>wq', ':wq!<cr>', {})
+vim.keymap.set('n', '<space>wqa', ':wqall!<cr>', {})
+-- vim.keymap.set('n', '<space>e', ':e!<cr>', {})
 vim.keymap.set('n', '<space>qq', ':q!<cr>', {})
 vim.keymap.set('n', '<space>w', ':w<cr>', {})
 vim.keymap.set('n', '<space>v', ':vs<cr>', {})
@@ -119,22 +137,24 @@ nnoremap ipdb Oimport ipdb; ipdb.set_trace()<ESC>
 nnoremap rdb Ofrom celery.contrib import rdb; rdb.set_trace()<ESC>
 nnoremap <space>i :silent execute('!isort -q --dont-order-by-type ' . expand("%:p"))<cr>
 ]])
--- TODO python only and a bit nasty in that it should take config from elsewhere
---vim.cmd([[
---  augroup FileTypePython
---    autocmd!
---    autocmd FileType python xnoremap <space>f :!black -q -t py311 -S --fast -l 120 -<CR>
---  augroup END
---]])
 
--- TODO really should get SetTabWidth working instead...
-vim.cmd([[
-  augroup FileTypeTypescript
-    autocmd!
-    autocmd FileType typescript setlocal tabstop=2 shiftwidth=2 expandtab
-    autocmd FileType typescriptreact setlocal tabstop=2 shiftwidth=2 expandtab
-  augroup END
-]])
+local function set_tab_settings(size)
+  return function()
+    vim.bo.tabstop = size
+    vim.bo.shiftwidth = size
+    vim.bo.softtabstop = size
+  end
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "go",
+  callback = set_tab_settings(4),
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "typescript", "typescriptreact" },
+  callback = set_tab_settings(2),
+})
 
 vim.cmd([[
 " just do the obvious thing
@@ -239,3 +259,16 @@ set.ttyfast    = true
 
 vim.api.nvim_set_hl(0, "FloatBorder", { link = "TelescopeNormal" })
 vim.api.nvim_set_hl(0, "ErrorMsg", { link = "Todo" })
+
+vim.api.nvim_create_user_command(
+  'Rgf',
+  function()
+    local fileName = vim.fn.expand('%:t')
+    vim.api.nvim_command("Rg '" .. fileName .. "'")
+  end,
+  {}
+)
+
+vim.cmd [[
+  au BufNewFile,BufRead *.avsc set filetype=json
+]]

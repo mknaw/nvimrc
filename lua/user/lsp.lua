@@ -7,17 +7,17 @@ vim.api.nvim_create_autocmd('LspAttach', {
         -- so try to hack it to make it like `diagnostic_jump_next`.
         -- vim.cmd('autocmd CursorHold * Lspsaga show_line_diagnostics ++unfocus')
         -- vim.cmd('autocmd CursorHold * <cmd>lua vim.diagnostic.open_float()<CR>')
-        vim.api.nvim_create_autocmd('CursorHold', {
-            callback = function()
-                for _, winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
-                    if vim.api.nvim_win_get_config(winid).zindex then
-                        return
-                    end
-                end
-                vim.diagnostic.open_float { focusable = false }
-            end,
-        })
-        vim.o.updatetime = 400
+        -- vim.api.nvim_create_autocmd('CursorHold', {
+        --     callback = function()
+                -- for _, winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+                --     if vim.api.nvim_win_get_config(winid).zindex then
+                --         return
+                --     end
+                -- end
+                -- vim.diagnostic.open_float { focusable = false }
+        --     end,
+        -- })
+        -- vim.o.updatetime = 400
         -- vim.api.nvim_set_keymap(
         --  'n', '<Leader>x', ':lua vim.diagnostic.open_float()<CR>',
         --  { noremap = true, silent = true }
@@ -33,6 +33,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
         -- vim.keymap.set('n', '<leader>D', '<cmd>Lspsaga hover_doc<CR>', opts)
         vim.keymap.set('n', '<leader>D', vim.lsp.buf.hover, opts)
         vim.keymap.set('n', '<leader>d', vim.lsp.buf.definition, opts)
+        vim.keymap.set('n', '<leader>vd', ':vsplit | lua vim.lsp.buf.definition()<CR>')
         -- vim.keymap.set('n', '<leader>dd', '<cmd>Lspsaga peek_definition ++unfocus<cr>', opts)
         vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
         -- TODO doesnt work for whatever reason
@@ -40,7 +41,15 @@ vim.api.nvim_create_autocmd('LspAttach', {
         vim.keymap.set({ 'n', 'v' }, '<leader>a', vim.lsp.buf.code_action, opts)
         vim.keymap.set('n', '<space>r', vim.lsp.buf.references, opts)
         vim.keymap.set('n', '<space>f', function()
-            vim.lsp.buf.format { async = true }
+            vim.lsp.buf.format({
+                async = true,
+                filter = function(client)
+                    return client.name ~= "ruff_lsp"
+                end
+            })
+        end, opts)
+        vim.keymap.set('n', '<space>e', function()
+                vim.diagnostic.open_float { focusable = false }
         end, opts)
         -- vim.keymap.set({ 'v', 'V' }, '<space>f', vim.lsp.buf.range_formatting)
         vim.api.nvim_set_keymap(
@@ -54,17 +63,17 @@ vim.api.nvim_create_autocmd('LspAttach', {
             { noremap = true, silent = true }
         )
 
-        function FormatFunction()
-            vim.lsp.buf.format({
-                async = true,
-                range = {
-                    ["start"] = vim.api.nvim_buf_get_mark(0, "<"),
-                    ["end"] = vim.api.nvim_buf_get_mark(0, ">"),
-                }
-            })
-        end
-
-        vim.api.nvim_set_keymap("v", "<space>f", "<Esc><cmd>lua FormatFunction()<CR>", { noremap = true })
+        -- function FormatFunction()
+        --     vim.lsp.buf.format({
+        --         async = true,
+        --         range = {
+        --             ["start"] = vim.api.nvim_buf_get_mark(0, "<"),
+        --             ["end"] = vim.api.nvim_buf_get_mark(0, ">"),
+        --         }
+        --     })
+        -- end
+        --
+        -- vim.api.nvim_set_keymap("v", "<space>f", "<Esc><cmd>lua FormatFunction()<CR>", { noremap = true })
     end,
 })
 

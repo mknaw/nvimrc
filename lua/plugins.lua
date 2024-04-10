@@ -29,6 +29,17 @@ require("lazy").setup({
                     end,
                     ["rust_analyzer"] = function()
                         require("rust-tools").setup {}
+                        local rt = require('rust-tools')
+                        rt.inlay_hints.enable()
+                        local inlay_enabled = true;
+                        vim.keymap.set('n', ',th', function()
+                            if inlay_enabled then
+                                rt.inlay_hints.disable()
+                            else
+                                rt.inlay_hints.enable()
+                            end
+                            inlay_enabled = not inlay_enabled
+                        end)
                         require("lspconfig").rust_analyzer.setup {
                             settings = {
                                 ["rust-analyzer"] = {
@@ -96,16 +107,32 @@ require("lazy").setup({
         end,
     },
     {
+        "jay-babu/mason-null-ls.nvim",
+        event = { "BufReadPre", "BufNewFile" },
+        dependencies = {
+            "williamboman/mason.nvim",
+            "nvimtools/none-ls.nvim",
+        },
+        config = function()
+            require("mason-null-ls").setup({
+                ensure_installed = nil,
+                automatic_installation = true,
+            })
+        end,
+    },
+    {
         "jose-elias-alvarez/null-ls.nvim",
         config = function()
             local null_ls = require("null-ls")
             null_ls.setup({
+                debug = true,
                 sources = {
                     null_ls.builtins.formatting.prettier,
                     -- null_ls.builtins.diagnostics.eslint,
                     -- null_ls.builtins.completion.spell,
+
                     null_ls.builtins.formatting.black.with({
-                        extra_args = { "-S", "-l", "120" },
+                        extra_args = { "--preview", "-l", "120" },
                     }),
                 }
             })
@@ -367,7 +394,13 @@ require("lazy").setup({
                         -- }
                     },
                     swap = {
-                        enable = true
+                        enable = true,
+                        swap_next = {
+                            ["<space>a"] = "@parameter.inner",
+                        },
+                        swap_previous = {
+                            ["<space>A"] = "@parameter.inner",
+                        },
                     },
                 },
                 use_languagetree = false,
@@ -385,7 +418,7 @@ require("lazy").setup({
     {
         'nvim-treesitter/nvim-treesitter-context',
         dependencies = { 'nvim-treesitter' },
-        enabled = false,
+        enabled = true,
         config = function()
             require 'treesitter-context'.setup {
                 enable = true,           -- Enable this plugin (Can be enabled/disabled later via commands)
@@ -424,6 +457,7 @@ require("lazy").setup({
         cmd = "Telescope",
         keys = {
             { "<leader>g",  "<cmd>Telescope find_files<cr>" },
+            { "<leader>ga", "<cmd>Telescope git_files<cr>" },
             -- TODO some of these file specific ones are only relevant in some directories...
             -- and also it seems like it'd be better to take their vals from env var?
             { "<leader>sp", "<cmd>Telescope find_files cwd=~/sp/<cr>" },
@@ -432,14 +466,14 @@ require("lazy").setup({
             { "<leader>nv", "<cmd>Telescope find_files cwd=~/.local/share/nvim/lazy/<cr>" },
             -- { "<leader>b",  "<cmd>Telescope buffers" },
             --{ "<leader>t",  "<cmd>lua require('telescope.builtin').tags()<cr>" },
-            { "<leader>fg", "<cmd>Telescope live_grep<cr>" },
-            { "<leader>fo", "<cmd>lua require('telescope.builtin').oldfiles()<cr>" },
-            { "<leader>fj", "<cmd>lua require('telescope.builtin').jumplist()<cr>" },
-            { "<leader>fh", "<cmd>lua require('telescope.builtin').help_tags()<cr>" },
-            { "<leader>fc", "<cmd>lua require('telescope.builtin').commands()<cr>" },
-            { "<leader>fq", "<cmd>lua require('telescope.builtin').quickfix()<cr>" },
-            { "<leader>fr", "<cmd>lua require('telescope.builtin').registers()<cr>" },
-            { "<leader>fz", "<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>" },
+            { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "live grep" },
+            { "<leader>fo", "<cmd>lua require('telescope.builtin').oldfiles()<cr>", desc = "old files" },
+            { "<leader>fj", "<cmd>lua require('telescope.builtin').jumplist()<cr>", desc = "jump list" },
+            { "<leader>fh", "<cmd>lua require('telescope.builtin').help_tags()<cr>", desc = "help tags" },
+            { "<leader>fc", "<cmd>lua require('telescope.builtin').commands()<cr>", desc = "commands" },
+            { "<leader>fq", "<cmd>lua require('telescope.builtin').quickfix()<cr>", desc = "quickfix" },
+            { "<leader>fr", "<cmd>lua require('telescope.builtin').registers()<cr>", desc = "registers" },
+            { "<leader>fz", "<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>", desc = "current register fuzzyfind" },
         },
         config = function()
             require('telescope').setup {
@@ -451,6 +485,11 @@ require("lazy").setup({
                         },
                     },
                 },
+                -- pickers = {
+                --     find_files = {
+                --         find_command = { "rg", "--files", "-uuu" },
+                --     },
+                -- },
                 extensions = {
                     fzy_native = {
                         override_generic_sorter = false,
@@ -547,22 +586,59 @@ require("lazy").setup({
     },
     {
         "ThePrimeagen/harpoon",
-        dependencies = { 'nvim-telescope/telescope.nvim' },
-        lazy = true,
-        keys = {
-            { 'mm',         '<cmd>lua require("harpoon.mark").add_file()<cr>' },
-            { 'mx',         '<cmd>lua require("harpoon.mark").clear_all()<cr>' },
-            { 'm,',         '<cmd>lua require("harpoon.ui").nav_prev()<cr>' },
-            { 'm.',         '<cmd>lua require("harpoon.ui").nav_next()<cr>' },
-            { '<leader>fm', '<cmd>Telescope harpoon marks<cr>' },
-        },
-        opts = {
-            mark_branch = true,
-        },
+        branch = "harpoon2",
+        dependencies = { "nvim-lua/plenary.nvim", 'nvim-telescope/telescope.nvim' },
+        -- keys = {
+        -- { 'mx',         '<cmd>lua require("harpoon.mark").clear_all()<cr>' },
+        -- { 'm,',         '<cmd>lua require("harpoon.ui").nav_prev()<cr>' },
+        -- { 'm.',         '<cmd>lua require("harpoon.ui").nav_next()<cr>' },
+        -- { '<leader>fm', '<cmd>Telescope harpoon marks<cr>' },
+        -- },
         config = function()
-            require("telescope").load_extension("harpoon")
+            local harpoon = require('harpoon')
+            harpoon:setup({
+                -- mark_branch = true,
+            })
+
+            vim.keymap.set("n", ",e", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+            vim.keymap.set("n", ",x", function()
+                harpoon:list():remove()
+                require("notify")("one harpoon removed")
+            end)
+            vim.keymap.set("n", ",xx", function()
+                harpoon:list():clear()
+                require("notify")("all harpoons cleared")
+            end)
+            vim.keymap.set("n", ",,", function()
+                harpoon:list():add()
+                require("notify")("harpoon added")
+            end)
+            vim.keymap.set("n", ",m", function() harpoon:list():prev({ ui_nav_wrap = true }) end)
+            vim.keymap.set("n", ",.", function() harpoon:list():next({ ui_nav_wrap = true }) end)
+
+            -- basic telescope configuration
+            local conf = require("telescope.config").values
+            local function toggle_telescope(harpoon_files)
+                local file_paths = {}
+                for _, item in ipairs(harpoon_files.items) do
+                    table.insert(file_paths, item.value)
+                end
+
+                require("telescope.pickers").new({}, {
+                    prompt_title = "Harpoon",
+                    finder = require("telescope.finders").new_table({
+                        results = file_paths,
+                    }),
+                    previewer = conf.file_previewer({}),
+                    sorter = conf.generic_sorter({}),
+                }):find()
+            end
+
+            vim.keymap.set("n", "<leader>fm", function() toggle_telescope(harpoon:list()) end,
+                { desc = "telescope harpoon" })
         end
     },
+
     -- motions
     {
         "chaoren/vim-wordmotion",
@@ -627,6 +703,7 @@ require("lazy").setup({
                     prev_selection = "", -- (Optional) keymap to select the previous selection
                     keymaps = {
                         ["."] = "textsubjects-smart",
+                        ['i;'] = 'textsubjects-container-inner',
                     },
                 },
             }
@@ -663,12 +740,36 @@ require("lazy").setup({
         end
     },
 
-    -- aesthetics
+
+    -- theme
     "ayu-theme/ayu-vim",
     {
         'nvim-lualine/lualine.nvim',
-        config = function() require('lualine-cfg') end,
+        dependencies = { "abeldekat/harpoonline", version = "*" },
+        config = function()
+            -- require('lualine-cfg')
+            local Harpoonline = require("harpoonline")
+            Harpoonline.setup({
+                on_update = function() require("lualine").refresh() end,
+                formatter_opts = {
+                    extended = { -- remove all spaces...
+                        indicators = { "1", "2", "3", "4" },
+                        empty_slot = "·",
+                        more_marks_indicator = "…", -- horizontal elipsis. Disable with empty string
+                        more_marks_active_indicator = "[…]", -- Disable with empty string
+                    },
+                },
+            })
+
+            local lualine_c = { Harpoonline.format, "filename" }
+            require("lualine").setup({ sections = { lualine_c = lualine_c } })
+        end,
     },
+    {
+        "uloco/bluloco.nvim",
+        dependencies = { "rktjmp/lush.nvim" }
+    },
+    -- other aesthetics
     "lukas-reineke/indent-blankline.nvim",
     "tpope/vim-sleuth", -- detect tabstop automatically
     {
@@ -754,7 +855,7 @@ require("lazy").setup({
 
     {
         "folke/which-key.nvim",
-        enabled = false,
+        -- enabled = false,
         event = "VeryLazy",
         init = function()
             vim.o.timeout = true
@@ -779,9 +880,79 @@ require("lazy").setup({
         --     }
         -- end
     },
+    {
+        "andythigpen/nvim-coverage",
+        lazy = true,
+        cmd = { "CoverageLoad" },
+        keys = {
+            { ",cl", "<cmd>CoverageLoad<cr>",   mode = { "n" }, silent = true },
+            { ",ct", "<cmd>CoverageToggle<cr>", mode = { "n" }, silent = true },
+        },
+        config = function()
+            require("coverage").setup({
+                commands = true, -- create commands
+                highlights = {
+                    -- customize highlight groups created by the plugin
+                    -- covered = { fg = "#C3E88D" }, -- supports style, fg, bg, sp (see :h highlight-gui)
+                    uncovered = { fg = "#F07178" },
+                },
+                signs = {
+                    -- use your own highlight groups or text markers
+                    -- covered = { hl = "CoverageCovered", text = "▎" },
+                    uncovered = { hl = "CoverageUncovered", text = "▎" },
+                },
+                lang = {
+                    python = {
+                        coverage_file = "coverage.json",
+                        coverage_command = "coverage json --fail-under=0 -q -o -",
+                        only_open_buffers = false,
+                    },
+                },
+            })
+        end
+    },
 
     {
-        "kevinhwang91/nvim-bqf"
+        "kevinhwang91/nvim-bqf",
+        opts = {
+            auto_enable = true,
+            auto_resize_height = true, -- highly recommended enable
+            preview = {
+                win_height = 30,
+                win_vheight = 30,
+                delay_syntax = 10,
+                show_title = false,
+                should_preview_cb = function(bufnr, qwinid)
+                    local ret = true
+                    local bufname = vim.api.nvim_buf_get_name(bufnr)
+                    local fsize = vim.fn.getfsize(bufname)
+                    if fsize > 100 * 1024 then
+                        -- skip file size greater than 100k
+                        ret = false
+                    elseif bufname:match('^fugitive://') then
+                        -- skip fugitive buffer
+                        ret = false
+                    end
+                    return ret
+                end
+            },
+            -- make `drop` and `tab drop` to become preferred
+            func_map = {
+                drop = 'o',
+                openc = 'O',
+                split = '<C-s>',
+                tabdrop = '<C-t>',
+                -- set to empty string to disable
+                tabc = '',
+                ptogglemode = 'z,',
+            },
+            filter = {
+                fzf = {
+                    action_for = { ['ctrl-s'] = 'split', ['ctrl-t'] = 'tab drop' },
+                    extra_opts = { '--bind', 'ctrl-o:toggle-all', '--prompt', '> ' }
+                }
+            }
+        }
     },
     {
         "rcarriga/nvim-notify",
@@ -861,7 +1032,6 @@ require("lazy").setup({
 --  }
 
 --  use 'mbbill/undotree'
---  --use 'andythigpen/nvim-coverage'
 
 
 
