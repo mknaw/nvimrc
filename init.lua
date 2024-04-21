@@ -123,8 +123,9 @@ end
 
 vim.keymap.set('n', '<space>c', toggle_qf, {})
 vim.keymap.set('n', '<space>wq', ':wq!<cr>', {})
+vim.keymap.set('n', '<space>wa', ':wall!<cr>', {})
 vim.keymap.set('n', '<space>wqa', ':wqall!<cr>', {})
--- vim.keymap.set('n', '<space>e', ':e!<cr>', {})
+vim.keymap.set('n', '<space>e', ':e!<cr>', {})
 vim.keymap.set('n', '<space>qq', ':q!<cr>', {})
 vim.keymap.set('n', '<space>w', ':w<cr>', {})
 vim.keymap.set('n', '<space>v', ':vs<cr>', {})

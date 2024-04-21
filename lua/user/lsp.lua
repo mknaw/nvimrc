@@ -48,7 +48,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
                 end
             })
         end, opts)
-        vim.keymap.set('n', '<space>e', function()
+        vim.keymap.set('n', '<space>d', function()
                 vim.diagnostic.open_float { focusable = false }
         end, opts)
         -- vim.keymap.set({ 'v', 'V' }, '<space>f', vim.lsp.buf.range_formatting)

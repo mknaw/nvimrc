@@ -240,6 +240,7 @@ require("lazy").setup({
     -- Snippets
     {
         "L3MON4D3/LuaSnip",
+        version = "v2.*",
         build = "make install_jsregexp",
         dependencies = {
             "rafamadriz/friendly-snippets",
@@ -335,6 +336,9 @@ require("lazy").setup({
                         toggle_system_role_open = "<C-s>",
                         stop_generating = "<C-x>",
                     },
+                },
+                openai_params = {
+                    model = "gpt-4-turbo",
                 },
             })
         end,
@@ -455,7 +459,9 @@ require("lazy").setup({
         "nvim-telescope/telescope.nvim",
         lazy = true,
         cmd = "Telescope",
+        dependencies = { 'nvim-telescope/telescope-project.nvim' },
         keys = {
+            { "<leader>p",  "<cmd>Telescope project<cr>",                                            desc = "Open projects list" },
             { "<leader>g",  "<cmd>Telescope find_files<cr>" },
             { "<leader>ga", "<cmd>Telescope git_files<cr>" },
             -- TODO some of these file specific ones are only relevant in some directories...
@@ -466,14 +472,15 @@ require("lazy").setup({
             { "<leader>nv", "<cmd>Telescope find_files cwd=~/.local/share/nvim/lazy/<cr>" },
             -- { "<leader>b",  "<cmd>Telescope buffers" },
             --{ "<leader>t",  "<cmd>lua require('telescope.builtin').tags()<cr>" },
-            { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "live grep" },
-            { "<leader>fo", "<cmd>lua require('telescope.builtin').oldfiles()<cr>", desc = "old files" },
-            { "<leader>fj", "<cmd>lua require('telescope.builtin').jumplist()<cr>", desc = "jump list" },
-            { "<leader>fh", "<cmd>lua require('telescope.builtin').help_tags()<cr>", desc = "help tags" },
-            { "<leader>fc", "<cmd>lua require('telescope.builtin').commands()<cr>", desc = "commands" },
-            { "<leader>fq", "<cmd>lua require('telescope.builtin').quickfix()<cr>", desc = "quickfix" },
-            { "<leader>fr", "<cmd>lua require('telescope.builtin').registers()<cr>", desc = "registers" },
+            { "<leader>fg", "<cmd>Telescope live_grep<cr>",                                          desc = "live grep" },
+            { "<leader>fo", "<cmd>lua require('telescope.builtin').oldfiles()<cr>",                  desc = "old files" },
+            { "<leader>fj", "<cmd>lua require('telescope.builtin').jumplist()<cr>",                  desc = "jump list" },
+            { "<leader>fh", "<cmd>lua require('telescope.builtin').help_tags()<cr>",                 desc = "help tags" },
+            { "<leader>fc", "<cmd>lua require('telescope.builtin').commands()<cr>",                  desc = "commands" },
+            { "<leader>fq", "<cmd>lua require('telescope.builtin').quickfix()<cr>",                  desc = "quickfix" },
+            { "<leader>fr", "<cmd>lua require('telescope.builtin').registers()<cr>",                 desc = "registers" },
             { "<leader>fz", "<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>", desc = "current register fuzzyfind" },
+            -- { "<leader>fv", "<cmd>Telescope find_files find_command=rg,--uu cwd=./.venv/<cr>", desc = "py .venv" },
         },
         config = function()
             require('telescope').setup {
@@ -495,8 +502,39 @@ require("lazy").setup({
                         override_generic_sorter = false,
                         override_file_sorter = true,
                     }
+                    -- project = {
+                    -- TODO figure out how to switch python venvs.
+                    -- on_project_selected = function(prompt_bufnr)
+                    --     -- Do anything you want in here. For example:
+                    --     project_actions.change_working_directory(prompt_bufnr, false)
+                    --     require("harpoon.ui").nav_file(1)
+                    -- end
+                    -- }
                 }
             }
+
+            local function venv_picker()
+                local finders = require "telescope.finders"
+                local conf = require("telescope.config").values
+                require("telescope.pickers").new({}, {
+                    prompt_title = ".venv",
+                    finder = finders.new_oneshot_job(
+                    -- TODO filter to only be in `site-packages`
+                        { "rg", "-uu", "--files", "./.venv/lib/" }, {
+                            -- TODO strip out everything before `site-packages`
+                            -- entry_maker = function(entry)
+                            --     return {
+                            --         value = entry,
+                            --         ordinal = string.format("%s %s", entry.file, entry.preview),
+                            --         display = "foo",
+                            --     }
+                            -- end,
+                        }),
+                    previewer = conf.grep_previewer({}),
+                    sorter = conf.file_sorter({}),
+                }):find()
+            end
+            vim.keymap.set("n", "<leader>fv", venv_picker, { desc = "telescope venv" })
         end,
     },
     {
@@ -507,6 +545,17 @@ require("lazy").setup({
             { "<leader>fs", function() require('telescope').extensions.luasnip.luasnip {} end },
         },
     },
+    -- {
+    --     'nvim-telescope/telescope-project.nvim',
+    --     dependencies = { 'nvim-telescope/telescope.nvim' },
+    --     lazy = true,
+    --     keys = {
+    --         { "<leader>p", "<cmd>Telescope project<cr>", desc = "Open projects list" },
+    --     },
+    --     config = function()
+    --         require 'telescope'.load_extension('project')
+    --     end
+    -- },
 
     -- Search
     {
@@ -565,6 +614,7 @@ require("lazy").setup({
     {
         "chentoast/marks.nvim", -- gutter letters when making bookmarks
         opts = {
+            default_mappings = false,
             refresh_interval = 500,
         }
     },
@@ -600,21 +650,21 @@ require("lazy").setup({
                 -- mark_branch = true,
             })
 
-            vim.keymap.set("n", ",e", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
-            vim.keymap.set("n", ",x", function()
+            vim.keymap.set("n", "me", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+            vim.keymap.set("n", "mx", function()
                 harpoon:list():remove()
                 require("notify")("one harpoon removed")
             end)
-            vim.keymap.set("n", ",xx", function()
+            vim.keymap.set("n", "mxx", function()
                 harpoon:list():clear()
                 require("notify")("all harpoons cleared")
             end)
-            vim.keymap.set("n", ",,", function()
+            vim.keymap.set("n", "mm", function()
                 harpoon:list():add()
                 require("notify")("harpoon added")
             end)
-            vim.keymap.set("n", ",m", function() harpoon:list():prev({ ui_nav_wrap = true }) end)
-            vim.keymap.set("n", ",.", function() harpoon:list():next({ ui_nav_wrap = true }) end)
+            vim.keymap.set("n", "m,", function() harpoon:list():prev({ ui_nav_wrap = true }) end)
+            vim.keymap.set("n", "m.", function() harpoon:list():next({ ui_nav_wrap = true }) end)
 
             -- basic telescope configuration
             local conf = require("telescope.config").values
@@ -845,7 +895,7 @@ require("lazy").setup({
         "folke/trouble.nvim",
         dependencies = { "nvim-tree/nvim-web-devicons" },
         keys = {
-            { "<space>d", "<cmd>TroubleToggle<cr>" },
+            { "<space>dd", "<cmd>TroubleToggle<cr>" },
         },
         cmd = { "TroubleToggle" },
         opts = {
@@ -926,8 +976,8 @@ require("lazy").setup({
                     local ret = true
                     local bufname = vim.api.nvim_buf_get_name(bufnr)
                     local fsize = vim.fn.getfsize(bufname)
-                    if fsize > 100 * 1024 then
-                        -- skip file size greater than 100k
+                    if fsize > 1000 * 1024 then
+                        -- skip file size greater than 1m
                         ret = false
                     elseif bufname:match('^fugitive://') then
                         -- skip fugitive buffer
