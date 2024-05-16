@@ -75,7 +75,7 @@ vim.keymap.set({ 'n', 'v' }, 'c', '"_c', {})
 vim.keymap.set('n', 'x', '"_x', {})
 
 -- copy to clipboard in general
-vim.keymap.set('v', '<C-C>', '"*y', {})
+vim.keymap.set('v', '<C-C>', '"+y', {})
 -- visual search + replace
 vim.keymap.set('v', '<C-r>', '"hy:%s/<C-r>h//gc<left><left><left>', {})
 

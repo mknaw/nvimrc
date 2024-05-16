@@ -65,6 +65,9 @@ require("lazy").setup({
                         require("lspconfig").pyright.setup {
                             -- TODO probably want our own root_dir instead of hacking the default_config
                             -- or just take an env var...
+                            -- Currently the solution is to make sure
+                            -- ~/.local/share/nvim/lazy/nvim-lspconfig/lua/lspconfig/server_configurations/pyright.lua
+                            -- has _only_ 'pyproject.toml' in its root_files.
                             settings = {
                                 python = {
                                     analysis = {
@@ -309,6 +312,7 @@ require("lazy").setup({
             "nvim-telescope/telescope.nvim"
         },
         event = "VeryLazy",
+        enabled = false,
         -- TODO replace me with gpt-4, eventually
         config = function()
             require("chatgpt").setup({
@@ -820,7 +824,13 @@ require("lazy").setup({
         dependencies = { "rktjmp/lush.nvim" }
     },
     -- other aesthetics
-    "lukas-reineke/indent-blankline.nvim",
+    {
+        "lukas-reineke/indent-blankline.nvim",
+        main = "ibl",
+        opts = {
+            scope = { enabled = false },
+        },
+    },
     "tpope/vim-sleuth", -- detect tabstop automatically
     {
         "stevearc/dressing.nvim",
